@@ -371,6 +371,7 @@ GameObject:
   - component: {fileID: 172108288}
   - component: {fileID: 172108287}
   - component: {fileID: 172108286}
+  - component: {fileID: 172108290}
   m_Layer: 0
   m_Name: PATCH_TEST_CUBE
   m_TagString: Untagged
@@ -470,6 +471,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &172108290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 172108285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47c1b34a5fc333d47b9f92373c3c94e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpinY
+  speed: 45
 --- !u!1 &179152011
 GameObject:
   m_ObjectHideFlags: 0
