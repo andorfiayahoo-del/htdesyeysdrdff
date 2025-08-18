@@ -34,3 +34,6 @@ Gateway/.env
 GatewayCJS/.env
 
 *.orig
+
+!Assets/Logs/
+!Assets/Logs/*.log
