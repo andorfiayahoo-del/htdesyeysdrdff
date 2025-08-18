@@ -1,0 +1,4 @@
+Patch-inbox e2e ✓
+This file was added by a ChatGPT-delivered patch.
+If you see this in Unity and in Git history, the pipeline works.
+Test file: HELLO_FROM_CHAT_4.txt
