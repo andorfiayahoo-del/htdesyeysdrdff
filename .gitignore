@@ -32,3 +32,5 @@ Server/config.json
 Gateway/config.json
 Gateway/.env
 GatewayCJS/.env
+
+*.orig
