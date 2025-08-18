@@ -8,3 +8,11 @@
 *.fbx filter=lfs diff=lfs merge=lfs -text
 *.mp4 filter=lfs diff=lfs merge=lfs -text
 *.mov filter=lfs diff=lfs merge=lfs -text
+# Unity YAML merge — normalize to LF in repo and use Unity smart-merge
+*.unity   text eol=lf merge=unityyamlmerge
+*.prefab  text eol=lf merge=unityyamlmerge
+*.asset   text eol=lf merge=unityyamlmerge
+*.mat     text eol=lf merge=unityyamlmerge
+*.anim    text eol=lf merge=unityyamlmerge
+*.meta    text eol=lf merge=unityyamlmerge
+ProjectSettings/*.asset text eol=lf merge=unityyamlmerge
