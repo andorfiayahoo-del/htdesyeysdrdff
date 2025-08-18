@@ -1,0 +1,8 @@
+{
+  "model": "gpt-4o-realtime-preview",
+  "session": {
+    "input_audio_format": "pcm16",
+    "output_audio_format": "pcm16",
+    "output_sample_rate_hz": 48000
+  }
+}

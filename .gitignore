@@ -1,0 +1,25 @@
+﻿[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+Assets/StreamingAssets/aa/*/*.bundle
+Assets/StreamingAssets/aa/*/*.hash
+Assets/StreamingAssets/aa/*/*.json
+# IDE/user
+.vs/
+.vscode/
+*.user
+*.csproj
+*.sln
+*.suo
+# OS cruft
+.DS_Store
+Thumbs.db
+# Node
+node_modules/
+# Local tooling
+PublicLogs/
+PublicShare/

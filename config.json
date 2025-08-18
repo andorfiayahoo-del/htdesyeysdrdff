@@ -1,0 +1,11 @@
+{
+  "port": 8765,
+  "model": "gpt-4o-realtime-preview",
+  "voice": "verse",
+  "keepalive_sec": 15,
+  "commit_ms": 1200,
+  "max_buffered_bytes": 1048576,
+  "openai": {
+    "url": "wss://api.openai.com/v1/realtime"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "unity-openai-realtime-gateway",
+  "version": "1.1.0",
+  "description": "Bridges Unity <-> OpenAI Realtime WebSocket",
+  "main": "server.cjs",
+  "type": "commonjs",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "scripts": {
+    "start": "node server.cjs --model gpt-4o-realtime-preview --input-audio-format pcm16 --output-audio-format pcm16 --port 8765 --verbose"
+  }
+}

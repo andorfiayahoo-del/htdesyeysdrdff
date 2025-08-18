@@ -1,0 +1,28 @@
+{
+    "items": [
+        {
+            "className": "Car",
+            "targetHint": "Car",
+            "runtimeDone": false,
+            "editDone": true
+        },
+        {
+            "className": "OnePointFiveCc",
+            "targetHint": "OnePointFiveCc",
+            "runtimeDone": false,
+            "editDone": true
+        },
+        {
+            "className": "Cars",
+            "targetHint": "Cars",
+            "runtimeDone": false,
+            "editDone": true
+        },
+        {
+            "className": "RetmareThere",
+            "targetHint": "RetmareThere",
+            "runtimeDone": false,
+            "editDone": true
+        }
+    ]
+}

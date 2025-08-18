@@ -1,0 +1,14 @@
+{
+  "name": "unity-realtime-gateway",
+  "version": "1.0.0",
+  "description": "Local WebSocket proxy for OpenAI Realtime to fix session formats and commit timing",
+  "main": "gateway.js",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "ws": "^8.17.0"
+  },
+  "scripts": {
+    "start": "node gateway.js"
+  }
+}
