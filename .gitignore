@@ -23,3 +23,12 @@ node_modules/
 # Local tooling
 PublicLogs/
 PublicShare/
+# secrets
+.env
+.env.*
+*.pem
+*.pfx
+Server/config.json
+Gateway/config.json
+Gateway/.env
+GatewayCJS/.env
