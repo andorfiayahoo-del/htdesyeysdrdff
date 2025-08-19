@@ -1,0 +1,3 @@
+Hello from patch #15
+Router+Apply pipeline test.
+If this file exists, the auto apply worked.
