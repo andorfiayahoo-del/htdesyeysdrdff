@@ -1,0 +1,3 @@
+Hello from patch #11
+This file should arrive via router and auto-apply via watcher.
+If you can read this in Unity, the pipeline works.
