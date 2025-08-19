@@ -1,0 +1,3 @@
+HELLO FROM CHAT 17
+This file is for instant-apply testing.
+If you see this, router applied patch #17 successfully.
