@@ -1,0 +1,3 @@
+Chat router v2 OK (patch 8)
+This file was created by an auto-applied patch.
+Have a nice day :)
