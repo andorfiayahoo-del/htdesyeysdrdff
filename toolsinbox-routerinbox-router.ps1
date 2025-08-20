@@ -64,7 +64,7 @@ function Invoke-Git([string[]]$gitArgs) {
     Push-Location -LiteralPath $RepoRoot
     & git @gitArgs 2>&1 | ForEach-Object { Write-Log ("GIT " + $_) }
     return $LASTEXITCODE
-  } catch { Write-Log ("GIT exception: " + $_.Exception.Message) 'R'; return 1 }
+  } catch { Write-Log ("GIT note: " + $_.Exception.Message) 'Y'; return 1 }
   finally { Pop-Location }
 }
 
