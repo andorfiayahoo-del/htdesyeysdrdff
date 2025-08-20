@@ -1,5 +1,5 @@
 ﻿$ErrorActionPreference = 'Stop'
-$Old = 'https://github.com/andorfiayahoo-del/unity-voice-realtime'
+$Old = 'https://github.com/andorfiayahoo-del/htdesyeysdrdff'
 $New = 'https://github.com/andorfiayahoo-del/htdesyeysdrdff'
 Write-Host ('Replacing repo URL: ' + $Old + '  -->  ' + $New) -ForegroundColor Yellow
 $root = (git rev-parse --show-toplevel).Trim()
@@ -33,4 +33,5 @@ if ($changed.Count -gt 0) {
 } else {
   Write-Host 'No files contained the old URL.' -ForegroundColor Cyan
 }
+
 

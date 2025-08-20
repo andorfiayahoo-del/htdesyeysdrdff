@@ -1,5 +1,5 @@
 ﻿$ErrorActionPreference = 'Stop'
-$Old = 'https://github.com/andorfiayahoo-del/unity-voice-realtime'
+$Old = 'https://github.com/andorfiayahoo-del/htdesyeysdrdff'
 $New = 'https://github.com/andorfiayahoo-del/htdesyeysdrdff'
 Write-Host ('Replacing repo URL: ' + $Old + '  -->  ' + $New) -ForegroundColor Yellow
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -30,4 +30,5 @@ git add -A
 git commit -m ('chore: replace repo URL ' + $Old + ' -> ' + $New)
 git push
 Write-Host ('Done. Updated ' + $targets.Count + ' file(s).') -ForegroundColor Green
+
 
