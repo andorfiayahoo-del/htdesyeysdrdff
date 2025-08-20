@@ -11,11 +11,12 @@ jobs:
         shell: bash
         run: |
           set -e
-          old='https://github.com/andorfiayahoo-del/unity-voice-realtime'
+          old='https://github.com/andorfiayahoo-del/htdesyeysdrdff'
           echo "Scanning for old URL: $old"
           if grep -RIn --exclude-dir .git --exclude-dir .github --exclude-dir Library --exclude-dir Temp --exclude-dir Obj --exclude-dir Logs --exclude-dir Build --exclude-dir Builds --exclude-dir Packages "$old" . ; then
             echo '::error ::Found old repository URL in the tree.'
             exit 1
           fi
           echo 'OK: no old URLs found'
+
 
