@@ -1,8 +1,7 @@
-﻿# inbox-router.ps1  v1.7.11c
-# - Normalizes git chatter so harmless From/To are not red.
-# - If a message starts with 'GIT exception: From|To', demote to yellow 'GIT note:'.
-# - Safer Invoke-Git: capture lines then log; no pipeline surprises.
-# - All other functionality unchanged from 1.7.11.
+﻿# inbox-router.ps1  v1.7.12
+# - Demote harmless git chatter ('From'/'To') to 'GIT note:' (yellow).
+# - Keep real git errors (error:/fatal:) red.
+# - No behavior changes to patching / compile wait; only logging normalization.
 
 param()
 Set-StrictMode -Version Latest
@@ -18,13 +17,11 @@ $PollMs     = 500
 
 function Write-Log([string]$msg, [string]$level='') {
   try {
-    # Force harmless git 'From/To' chatter to yellow if it ever comes through the exception path
+    # Normalize harmless git transport lines even if they slip in via 'exception' path
     if ($msg -match '^GIT exception:\s*(From|To)\s') {
       $msg = $msg -replace '^GIT exception:', 'GIT note:'
       $level = 'Y'
-    }
-    # Optional: soften any generic "GIT exception:" to a yellow note unless a real error is included
-    elseif ($msg -match '^GIT exception:' -and $msg -notmatch '(error:|fatal:|denied|permission)') {
+    } elseif ($msg -match '^GIT exception:' -and $msg -notmatch '(error:|fatal:|denied|permission)') {
       $msg = $msg -replace '^GIT exception:', 'GIT note:'
       if ($level -eq '' -or $level -eq 'R') { $level = 'Y' }
     }
@@ -61,7 +58,7 @@ if (-not $scriptPath) {
 }
 
 Write-Log ("BOOT who={0}\{1} pid={2} pwsh={3} cwd={4}" -f $env:COMPUTERNAME,$env:USERNAME,$PID,$PSVersionTable.PSVersion,(Get-Location))
-Write-Log ("SCRIPT version=v1.7.11c path={0}" -f $scriptPath)
+Write-Log ("SCRIPT version=v1.7.12 path={0}" -f $scriptPath)
 
 # Repo presence
 if (-not (Test-Path -LiteralPath $RepoRoot))  { Write-Log ("ERROR missing repo path: {0}" -f $RepoRoot) 'R'; return }
@@ -77,14 +74,15 @@ function Invoke-Git([string[]]$gitArgs) {
     Push-Location -LiteralPath $RepoRoot
     $out = & git @gitArgs 2>&1
     foreach ($ln in $out) {
-      # Plain git chatter uses neutral color; real errors will be handled by callers via return code
+      # Stream all normal git output
       Write-Log ("GIT " + $ln)
     }
     return $LASTEXITCODE
   } catch {
-    # Catch truly exceptional cases. Write as a note unless we can prove it's a real error.
+    # If PowerShell throws, it's exceptional; classify softly unless the text contains a real error token
     $em = $_.Exception.Message
-    Write-Log ("GIT exception: " + $em) 'Y'
+    if ($em -match '(error:|fatal:|denied|permission)') { Write-Log ("GIT exception: " + $em) 'R' }
+    else { Write-Log ("GIT note: " + $em) 'Y' }
     return 1
   } finally {
     Pop-Location
@@ -124,8 +122,6 @@ function Ensure-BranchMain() {
   Write-Log "ENSURE main: now on 'main' (up-to-date or best-effort)" 'Y'
   return $true
 }
-
-# ---- (Keep the rest identical to your current 1.7.11 script) ----
 
 function Parse-PatchInfo([string]$patchPath) {
   $text  = Get-Content -LiteralPath $patchPath -Raw -Encoding UTF8
@@ -305,7 +301,7 @@ function Reconcile-NewFiles([hashtable]$info,[string]$patchName) {
           return $false
         }
       } else {
-        Write-Log ("RECONCILE skip: {0} already matches expected content" -f $k)
+        Write-Log ("RECONCILE result: file already matches expected content for {0}" -f $k)
       }
     }
 
@@ -317,12 +313,9 @@ function Reconcile-NewFiles([hashtable]$info,[string]$patchName) {
     $msg = "inbox: reconcile " + $patchName
     if (Invoke-Git @('commit','-m',$msg)) { Write-Log ("RECONCILE commit-failed: {0}" -f $patchName) 'R'; return $false }
     if (Invoke-Git @('-c','rebase.autoStash=true','pull','--rebase','origin','main')) { Write-Log ("RECONCILE pull-warning: {0}" -f $patchName) 'Y' }
-
     $since = (Get-Date).ToUniversalTime()
     if (Should-WaitForCompile $info) { Wait-ForUnityCompile $since } else { Write-Log "UNITY skip: no .cs changes in this patch" 'Y' }
     if (Invoke-Git @('push','-u','origin','HEAD:main')) { Write-Log ("RECONCILE push-warning: {0}" -f $patchName) 'Y' }
-  } else {
-    Write-Log ("RECONCILE result: all files already present and identical for {0}" -f $patchName)
   }
 
   return $true
@@ -373,11 +366,9 @@ function Apply-Patch([string]$fullPath) {
     $msg = "inbox: apply " + $name
     if (Invoke-Git @('commit','-m',$msg)) { Write-Log ("APPLY commit-failed: {0}" -f $name) 'R'; return }
     if (Invoke-Git @('-c','rebase.autoStash=true','pull','--rebase','origin','main')) { Write-Log ("APPLY pull-warning: {0}" -f $name) 'Y' }
-
     $since = (Get-Date).ToUniversalTime()
     if (Should-WaitForCompile $pi) { Wait-ForUnityCompile $since } else { Write-Log "UNITY skip: no .cs changes in this patch" 'Y' }
     if (Invoke-Git @('push','-u','origin','HEAD:main')) { Write-Log ("APPLY push-warning: {0}" -f $name) 'Y' }
-
     Write-Log ("APPLY success: {0}" -f $name) 'G'
   }
   catch { Write-Log ("APPLY exception: " + $_.Exception.Message) 'R' }
