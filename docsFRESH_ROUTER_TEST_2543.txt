@@ -1,0 +1,4 @@
+﻿Fresh router normalization test #3
+Created: 2025-08-20T17:46:37.941659Z
+Expectation: Router v1.7.12 rewrites 'GIT exception: From/To' to 'GIT note:' (yellow).
+
