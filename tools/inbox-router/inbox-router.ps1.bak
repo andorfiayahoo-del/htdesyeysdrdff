@@ -328,24 +328,6 @@ function Reconcile-NewFiles([hashtable]$info,[string]$patchName) {
   return $true
 }
 # ---- Move helper ----
-function Move-AppliedPatch([string]\,[string]\) {
-  try {
-    \ = Join-Path \ 'AppliedPatches'
-    if (-not (Test-Path -LiteralPath \)) { New-Item -ItemType Directory -Path \ -Force | Out-Null }
-    if (Test-Path -LiteralPath \) {
-      \ = Split-Path -Leaf \
-      \ = Join-Path \ \
-      if (Test-Path -LiteralPath \) {
-        \ = Get-Date -Format 'yyyyMMdd-HHmmss'
-        \ = Join-Path \ ("\{0\}-\{1\}" -f \, \)
-      }
-      Move-Item -LiteralPath \ -Destination \ -Force
-      Write-Log ("APPLY archive: moved '\{0\}' to '\{1\}'" -f \,\) 'Y'
-    }
-  } catch {
-    Write-Log ("APPLY archive-failed for \{0\}: \{1\}" -f \,\.Exception.Message) 'R'
-  }
-}
 # ---- Main apply flow ----
 function Apply-Patch([string]$fullPath) {
   $name = Split-Path -Leaf $fullPath
@@ -430,6 +412,7 @@ while ($true) {
   } catch { Write-Log ("LOOP exception: " + $_.Exception.Message) 'R' }
   Start-Sleep -Milliseconds $PollMs
 }
+
 
 
 
