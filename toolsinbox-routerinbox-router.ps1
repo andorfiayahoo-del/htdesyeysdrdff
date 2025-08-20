@@ -1,6 +1,7 @@
 ﻿# inbox-router.ps1  v1.7.11
 # - Push AFTER Unity compile for C# patches; push immediately for non-C# patches
-# - Same safety features as v1.7.10 (safe path resolve, lint, reconcile, verify new .cs, single-instance)
+# - Safe path resolve, lint, reconcile, verify new .cs, single-instance
+# - Log normalization: any "GIT exception:" -> "GIT note:" (yellow)
 
 param()
 Set-StrictMode -Version Latest
@@ -16,6 +17,12 @@ $PollMs     = 500
 
 function Write-Log([string]$msg, [string]$level='') {
   try {
+    # Normalize noisy git wording/colors
+    if ($msg -like 'GIT exception:*') {
+      $msg = $msg -replace '^GIT exception:', 'GIT note:'
+      if ($level -eq '' -or $level -eq 'R') { $level = 'Y' }
+    }
+
     $ts = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
     $line = "[$ts] $msg"
     Add-Content -LiteralPath $LogPath -Value $line
@@ -62,10 +69,16 @@ try {
 function Invoke-Git([string[]]$gitArgs) {
   try {
     Push-Location -LiteralPath $RepoRoot
-    & git @gitArgs 2>&1 | ForEach-Object { Write-Log ("GIT " + $_) }
+    # Capture then log; avoid pipeline scoping weirdness with $_
+    $out = & git @gitArgs 2>&1
+    foreach ($ln in $out) { Write-Log ("GIT " + $ln) }
     return $LASTEXITCODE
-  } catch { Write-Log ("GIT note: " + $_.Exception.Message) 'Y'; return 1 }
-  finally { Pop-Location }
+  } catch {
+    Write-Log ("GIT note: " + $_.Exception.Message) 'Y'
+    return 1
+  } finally {
+    Pop-Location
+  }
 }
 
 function Get-CurrentBranch() {
@@ -130,13 +143,13 @@ function Parse-PatchInfo([string]$patchPath) {
 function Lint-CsAdded([string]$file,[string[]]$addedLines) {
   if (-not $addedLines -or $addedLines.Count -eq 0) { return $true }
   $txt = [string]::Join("`n", $addedLines)
-  $ifs    = [regex]::Matches($txt, '^\s*#if\s+UNITY_EDITOR', 'Multiline').Count
+  $ifs    = [regex]::Matches($txt, '^\s*#if\s+UNITY_EDITOR\b', 'Multiline').Count
   $endifs = [regex]::Matches($txt, '^\s*#endif\s*$', 'Multiline').Count
   if ($ifs -gt 0 -and $endifs -eq 0) { Write-Log ("LINT fail: {0} has #if UNITY_EDITOR without #endif" -f $file) 'R'; return $false }
   $nonEmpty = $addedLines | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
   if ($nonEmpty.Count -gt 0) {
     $first = $nonEmpty[0]; $last = $nonEmpty[$nonEmpty.Count-1]
-    if ($first -match '^\s*#if\s+UNITY_EDITOR' -and $last -notmatch '^\s*#endif\s*$') {
+    if ($first -match '^\s*#if\s+UNITY_EDITOR\b' -and $last -notmatch '^\s*#endif\s*$') {
       Write-Log ("LINT fail: {0} begins with #if UNITY_EDITOR but last added line is not #endif" -f $file) 'R'
       return $false
     }
@@ -163,12 +176,12 @@ function Verify-And-Fix-NewCs([hashtable]$info) {
     if (-not $v['IsCs']) { continue }
     if (-not $v['IsNew']) { continue }
 
-    $rel = $k -replace '/', ''
+    $rel = $k -replace '/', '\'
     $full = Join-Path $RepoRoot $rel
     $expected = [string]::Join("`r`n", $v['AddedLines']) + "`r`n"
 
     $needEndIf = $false
-    foreach ($line in $v['AddedLines']) { if ($line -match '^\s*#if\s+UNITY_EDITOR') { $needEndIf = $true; break } }
+    foreach ($line in $v['AddedLines']) { if ($line -match '^\s*#if\s+UNITY_EDITOR\b') { $needEndIf = $true; break } }
 
     $shouldHaveEndIf = $false
     foreach ($line in $v['AddedLines']) { if ($line -match '^\s*#endif\s*$') { $shouldHaveEndIf = $true; break } }
@@ -214,7 +227,7 @@ function Ensure-BalancedUnityIf([string]$fullPath) {
   if (-not (Test-Path -LiteralPath $fullPath)) { return }
   try {
     $src = Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8
-    $ifs    = [regex]::Matches($src, '^\s*#if\s+UNITY_EDITOR', 'Multiline').Count
+    $ifs    = [regex]::Matches($src, '^\s*#if\s+UNITY_EDITOR\b', 'Multiline').Count
     $endifs = [regex]::Matches($src, '^\s*#endif\s*$', 'Multiline').Count
     Write-Log ("POSTCHECK {0}: #if={1} #endif={2}" -f $fullPath, $ifs, $endifs) 'Y'
     if ($ifs -gt $endifs) {
@@ -257,7 +270,7 @@ function Reconcile-NewFiles([hashtable]$info,[string]$patchName) {
   if (-not $allNew) { return $false }
 
   foreach ($k in $info.Keys) {
-    $rel = ($k -replace '/', '')
+    $rel = ($k -replace '/', '\')
     $full = Join-Path $RepoRoot $rel
     $expected = [string]::Join("`r`n", $info[$k]['AddedLines']) + "`r`n"
 
@@ -290,11 +303,11 @@ function Reconcile-NewFiles([hashtable]$info,[string]$patchName) {
     }
 
     if ($info[$k]['IsCs']) {
-      $full = Join-Path $RepoRoot (($k -replace '/', ''))
+      $full = Join-Path $RepoRoot (($k -replace '/', '\'))
       if (Test-Path -LiteralPath $full) {
         try {
           $src = Get-Content -LiteralPath $full -Raw -Encoding UTF8
-          $ifs = [regex]::Matches($src, '^\s*#if\s+UNITY_EDITOR', 'Multiline').Count
+          $ifs = [regex]::Matches($src, '^\s*#if\s+UNITY_EDITOR\b', 'Multiline').Count
           $endifs = [regex]::Matches($src, '^\s*#endif\s*$', 'Multiline').Count
           if ($ifs -gt $endifs) { Add-Content -LiteralPath $full -Value "`r`n#endif" -Encoding UTF8 }
         } catch {}
@@ -335,7 +348,7 @@ function Apply-Patch([string]$fullPath) {
     if ($check -ne 0) {
       if (Reconcile-NewFiles $pi $name) {
         foreach ($k in $pi.Keys) { if ($pi[$k]['IsCs']) {
-          $full = Join-Path $RepoRoot (($k -replace '/', ''))
+          $full = Join-Path $RepoRoot (($k -replace '/', '\'))
           Ensure-BalancedUnityIf $full
         }}
         $since = (Get-Date).ToUniversalTime()
@@ -357,7 +370,7 @@ function Apply-Patch([string]$fullPath) {
 
     foreach ($k in $pi.Keys) {
       if ($pi[$k]['IsCs']) {
-        $full = Join-Path $RepoRoot (($k -replace '/', ''))
+        $full = Join-Path $RepoRoot (($k -replace '/', '\'))
         Ensure-BalancedUnityIf $full
       }
     }
