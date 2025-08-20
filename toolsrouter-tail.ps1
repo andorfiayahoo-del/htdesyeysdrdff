@@ -1,6 +1,9 @@
-﻿param(
+﻿# router-tail.ps1  TAILER v1.1
+param(
   [string]$LogPath = "$env:USERPROFILE\patch-router.log"
 )
+
+Write-Host "TAILER v1.1 starting. LogPath=$LogPath" -ForegroundColor Cyan
 
 function Write-ColoredLine([string]$line) {
   $fg = 'Gray'
@@ -42,7 +45,9 @@ function Write-ColoredLine([string]$line) {
     'RECONCILE (wrote|replaced)'             { $fg = 'Cyan'; break }
     'UNITY skip\b'                           { $fg = 'Cyan'; break }
 
-    # Git chatter — make harmless stuff yellow or dim
+    # Git chatter — ensure harmless From/To are Yellow even if prefixed by 'GIT exception:'
+    '^GIT exception: From '                  { $fg = 'Yellow'; break }
+    '^GIT exception: To '                    { $fg = 'Yellow'; break }
     '^GIT (note: )?From '                    { $fg = 'Yellow'; break }
     '^GIT (note: )?To '                      { $fg = 'Yellow'; break }
     '^GIT \[.*\]'                            { $fg = 'DarkGray'; break }
