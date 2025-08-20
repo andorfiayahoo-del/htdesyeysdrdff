@@ -18,3 +18,4 @@ public static class InboxForceRefresh_0124
         Debug.Log("[Inbox] Forced refresh after patch 0124.");
     }
 }
+#endif
