@@ -1,0 +1,4 @@
+﻿GIT color test marker (second run)
+Created: 2025-08-20T16:51:59.335544Z
+Expectation: pull/push lines show as 'GIT note' (yellow) or plain 'GIT ...', not red.
+
