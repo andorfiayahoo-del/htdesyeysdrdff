@@ -1,1 +1,23 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
+using UnityEditor;
+using UnityEngine;
+[InitializeOnLoad]
+public static class InboxCompileSignal_2201
+{
+    static InboxCompileSignal_2201()
+    {
+        try
+        {
+            var stamp = System.IO.Path.Combine(Application.dataPath, "InboxPatches", "CompileDone.stamp");
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(stamp));
+            System.IO.File.WriteAllText(stamp, System.DateTime.UtcNow.ToString("o"));
+            Debug.Log("[Inbox] 2201 wrote CompileDone.stamp");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning("[Inbox] 2201 failed to write CompileDone.stamp: " + ex.Message);
+        }
+    }
+}
+#endif
+
