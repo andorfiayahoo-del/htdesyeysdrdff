@@ -1,0 +1,4 @@
+﻿GIT color test marker (fourth run)
+Created: 2025-08-20T17:12:06.299782Z
+This should show Git From/To as yellow via the tailer, not red.
+
