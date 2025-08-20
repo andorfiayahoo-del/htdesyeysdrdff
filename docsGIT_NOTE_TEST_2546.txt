@@ -1,0 +1,4 @@
+﻿GIT note normalization check
+Created: 2025-08-20T17:53:08.061481Z
+Should see 'GIT note: From/To' in yellow if router v1.7.12 is active.
+
