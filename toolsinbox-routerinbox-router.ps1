@@ -1,4 +1,4 @@
-﻿# inbox-router.ps1  v1.7.11
+﻿# inbox-router.ps1  v1.7.11b
 # - Push AFTER Unity compile for C# patches; push immediately for non-C# patches
 # - Safe path resolve, lint, reconcile, verify new .cs, single-instance
 # - Log normalization: any "GIT exception:" -> "GIT note:" (yellow)
@@ -55,7 +55,7 @@ if (-not $scriptPath) {
 }
 
 Write-Log ("BOOT who={0}\{1} pid={2} pwsh={3} cwd={4}" -f $env:COMPUTERNAME,$env:USERNAME,$PID,$PSVersionTable.PSVersion,(Get-Location))
-Write-Log ("SCRIPT version=v1.7.11 path={0}" -f $scriptPath)
+Write-Log ("SCRIPT version=v1.7.11b path={0}" -f $scriptPath)
 
 # Repo presence
 if (-not (Test-Path -LiteralPath $RepoRoot))  { Write-Log ("ERROR missing repo path: {0}" -f $RepoRoot) 'R'; return }
@@ -69,7 +69,6 @@ try {
 function Invoke-Git([string[]]$gitArgs) {
   try {
     Push-Location -LiteralPath $RepoRoot
-    # Capture then log; avoid pipeline scoping weirdness with $_
     $out = & git @gitArgs 2>&1
     foreach ($ln in $out) { Write-Log ("GIT " + $ln) }
     return $LASTEXITCODE
