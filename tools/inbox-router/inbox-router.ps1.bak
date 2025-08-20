@@ -57,7 +57,7 @@ if (-not $scriptPath) {
 }
 
 Write-Log ("BOOT who={0}\{1} pid={2} pwsh={3} cwd={4}" -f $env:COMPUTERNAME,$env:USERNAME,$PID,$PSVersionTable.PSVersion,(Get-Location))
-Write-Log ("SCRIPT version=v1.7.11 path={0}" -f $scriptPath)
+Write-Log ("SCRIPT version=v1.7.12 path={0}" -f $scriptPath)
 
 # Repo presence
 if (-not (Test-Path -LiteralPath $RepoRoot))  { Write-Log ("ERROR missing repo path: {0}" -f $RepoRoot) 'R'; return }
@@ -412,5 +412,6 @@ while ($true) {
   } catch { Write-Log ("LOOP exception: " + $_.Exception.Message) 'R' }
   Start-Sleep -Milliseconds $PollMs
 }
+
 
 
