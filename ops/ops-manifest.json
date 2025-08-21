@@ -1,0 +1,9 @@
+﻿{
+    "generatedUtc":  "2025-08-21T08:12:34.3628387Z",
+    "routerRel":  "tools\\inbox-router\\inbox-router.ps1",
+    "routerVersion":  "1.7.12",
+    "repoLogDirRel":  "ops/logs",
+    "localRouterLog":  "C:\\Users\\ander\\patch-router.log",
+    "localArchiverLog":  "C:\\Users\\ander\\patch-archiver.log",
+    "collectorRel":  "tools/ops/collect-logs.ps1"
+}
