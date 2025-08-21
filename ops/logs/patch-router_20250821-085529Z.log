@@ -1,0 +1,16 @@
+﻿[2025-08-21T07:21:51Z] BOOT who=DESKTOP-UQ7MKQ0\ander pid=42280 pwsh=5.1.19041.6216 cwd=C:\Users\ander
+[2025-08-21T07:21:51Z] SCRIPT version=v1.7.12 path=C:\Users\ander\inbox-router.ps1
+[2025-08-21T07:21:51Z] WATCH polling: C:\Users\ander\Downloads (*.patch) debounce=1500 settle=1200 poll=500
+[2025-08-21T07:21:55Z] READY detected: 'C:\Users\ander\Downloads\patch_734779.patch' size=195 lastWriteUtc=2025-08-21T07:21:52.4644673Z
+[2025-08-21T07:21:55Z] APPLY start: patch_734779.patch
+[2025-08-21T07:21:55Z] GIT [main 07c8768] inbox: apply patch_734779.patch
+[2025-08-21T07:21:55Z] GIT  1 file changed, 2 insertions(+)
+[2025-08-21T07:21:55Z] GIT  create mode 100644 docs/VERIFY_GUARD_734779.txt
+[2025-08-21T07:21:56Z] GIT note: From https://github.com/andorfiayahoo-del/htdesyeysdrdff
+[2025-08-21T07:21:56Z] APPLY pull-warning: patch_734779.patch
+[2025-08-21T07:21:56Z] UNITY skip: no .cs changes in this patch
+[2025-08-21T07:21:59Z] GIT branch 'main' set up to track 'origin/main'.
+[2025-08-21T07:21:59Z] GIT note: To https://github.com/andorfiayahoo-del/htdesyeysdrdff.git
+[2025-08-21T07:21:59Z] APPLY push-warning: patch_734779.patch
+[2025-08-21T07:21:59Z] APPLY success: patch_734779.patch
+[2025-08-21T07:21:59Z] ARCHIVE note: external archiver will move patch_734779.patch
