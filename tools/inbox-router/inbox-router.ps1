@@ -350,7 +350,7 @@ function Apply-Patch([string]$fullPath) {
         $since = (Get-Date).ToUniversalTime()
         if (Should-WaitForCompile $pi) { Wait-ForUnityCompile $since } else { Write-Log "UNITY skip: no .cs changes in this patch" 'Y' }
         Write-Log ("APPLY success (reconciled): {0}" -f $name) 'G'
-        Move-AppliedPatch $fullPath $name
+Write-Log ("ARCHIVE note: external archiver will move {0}" -f $name) 'Y'
         return
       }
 
@@ -382,7 +382,7 @@ function Apply-Patch([string]$fullPath) {
     if (Invoke-Git @('push','-u','origin','HEAD:main')) { Write-Log ("APPLY push-warning: {0}" -f $name) 'Y' }
 
     Write-Log ("APPLY success: {0}" -f $name) 'G'
-    Move-AppliedPatch $fullPath $name
+Write-Log ("ARCHIVE note: external archiver will move {0}" -f $name) 'Y'
   }
   catch { Write-Log ("APPLY exception: " + $_.Exception.Message) 'R' }
 }
@@ -433,3 +433,4 @@ if (-not (Get-Command -Name Move-AppliedPatch -ErrorAction SilentlyContinue)) {
     } catch { }
   }
 }
+
