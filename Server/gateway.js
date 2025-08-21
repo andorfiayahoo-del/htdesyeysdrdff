@@ -157,11 +157,12 @@ wss.on('connection', (downstream, req) => {
       if (elapsed < CONFIG.minCommitMs) {
         setTimeout(() => {
           try { upstream.send(JSON.stringify(msg)); } catch {}
+          bytesSinceLastCommit = 0;
         }, CONFIG.minCommitMs - elapsed);
       } else {
         try { upstream.send(JSON.stringify(msg)); } catch {}
+        bytesSinceLastCommit = 0;
       }
-      bytesSinceLastCommit = 0;
       return;
     }
 
