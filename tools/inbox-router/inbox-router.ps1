@@ -328,12 +328,6 @@ function Reconcile-NewFiles([hashtable]$info,[string]$patchName) {
   return $true
 }
 # ---- Move helper ----
-# ---- Archive hook (external tailer) ----
-if (-not (Get-Command Move-AppliedPatch -ErrorAction SilentlyContinue)) {
-  function Move-AppliedPatch([string]$fullPath,[string]$name) {
-    try { Write-Log ("ARCHIVE note: external archiver handles '{0}'" -f $name) 'Y' } catch {}
-  }
-}
 # ---- Main apply flow ----
 function Apply-Patch([string]$fullPath) {
   $name = Split-Path -Leaf $fullPath
@@ -420,7 +414,6 @@ while ($true) {
   } catch { Write-Log ("LOOP exception: " + $_.Exception.Message) 'R' }
   Start-Sleep -Milliseconds $PollMs
 }
-
 
 
 
