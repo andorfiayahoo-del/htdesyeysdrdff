@@ -1,0 +1,8 @@
+﻿{
+    "updatedUtc":  "2025-08-21T09:18:56.3888780Z",
+    "reason":  "run-once",
+    "wroteRouter":  true,
+    "wroteArchiver":  true,
+    "routerLogFile":  "ops/live/patch-router.log",
+    "archiverLogFile":  "ops/live/patch-archiver.log"
+}
