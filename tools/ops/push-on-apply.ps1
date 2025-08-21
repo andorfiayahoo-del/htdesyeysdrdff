@@ -7,7 +7,7 @@
 )
 $ErrorActionPreference = 'Stop'
 
-# --- quiet git helper (no console noise) ---
+# --- quiet git helper (fully silent) ---
 function Invoke-GitQuiet { param([string[]]$GitArgs)
   if (-not $GitArgs -or $GitArgs.Count -eq 0) { return }
   $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -30,7 +30,22 @@ $LiveDir     = Join-Path $RepoRoot 'ops\live'
 $LiveRouter  = Join-Path $LiveDir  'patch-router.log'
 $LiveArch    = Join-Path $LiveDir  'patch-archiver.log'
 $MetaPath    = Join-Path $LiveDir  'latest.json'
+$Cooldown    = Join-Path $LiveDir  '.cooldown'
 New-Item -ItemType Directory -Path $LiveDir -Force | Out-Null
+
+function Cooldown-Ok([int]$ms = 1500){
+  try {
+    if (Test-Path -LiteralPath $Cooldown) {
+      $age = (Get-Date) - (Get-Item -LiteralPath $Cooldown).LastWriteTime
+      if ($age.TotalMilliseconds -lt $ms) { return $false }
+      (Get-Item -LiteralPath $Cooldown).LastWriteTime = Get-Date
+      return $true
+    } else {
+      Set-Content -LiteralPath $Cooldown -Value '' -Encoding ascii
+      return $true
+    }
+  } catch { return $true }
+}
 
 function Write-IfExists([string]$src,[string]$dst,[int]$tail){
   if (Test-Path -LiteralPath $src){
@@ -91,26 +106,21 @@ function Flush([string]$reason){
   if (Snapshot-And-Stage $reason) { Commit-Push-If-Changes $reason }
 }
 
-# One-shot mode for manual triggers
-if ($RunOnce) { Flush 'run-once'; return }
+# --- One-shot mode (spawned by the watcher; guarded) ---
+if ($RunOnce) {
+  if (-not (Cooldown-Ok 1500)) { return }
+  Flush 'run-once'
+  return
+}
 
-# --- event wiring (no polling) ---
-$rxSuccess  = [regex]'APPLY success(?: \((?:reconciled)\))?:\s*patch_\d+\.patch\b'
-$script:pendingReason = $null
+# --- Event-driven mode: watch both logs and spawn -RunOnce on change ---
+$self = $MyInvocation.MyCommand.Path
+$psExe = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
 
-# Debounce timer that fires after 1.2s from the last change
-$script:debounce = New-Object System.Timers.Timer 1200
-$script:debounce.AutoReset = $false
-Register-ObjectEvent -InputObject $script:debounce -EventName Elapsed -SourceIdentifier 'DebouncedFlush' -Action {
-  try {
-    $r = $script:pendingReason
-    $script:pendingReason = $null
-    if (-not $r) { $r = 'debounced-change' }
-    Flush $r
-  } catch {}
-} | Out-Null
+# Ensure initial snapshot exists in the repo
+Flush 'initial-sync'
 
-# FileSystemWatcher for both logs
+# Watch for Created + Changed on patch-*.log in user profile
 $dir = Split-Path -Parent $RouterLogLocal
 $fsw = New-Object System.IO.FileSystemWatcher
 $fsw.Path = $dir
@@ -119,27 +129,13 @@ $fsw.IncludeSubdirectories = $false
 $fsw.NotifyFilter = [IO.NotifyFilters]'FileName, LastWrite, Size'
 $fsw.EnableRaisingEvents = $true
 
-Register-ObjectEvent -InputObject $fsw -EventName Changed -SourceIdentifier 'LogChanged' -Action {
+$action = {
   try {
-    $path = $Event.SourceEventArgs.FullPath
-    $reason = 'change'
-    if ($path -like '*patch-router.log') {
-      try {
-        $tail = Get-Content -LiteralPath $path -Tail 80
-        foreach ($ln in $tail) {
-          if ($ln -match 'APPLY success(?: \((?:reconciled)\))?:\s*patch_\d+\.patch\b') {
-            $reason = 'apply-success'; break
-          }
-        }
-      } catch {}
-    }
-    # escalate reason if a stronger one arrives before debounce fires
-    if ($script:pendingReason -ne 'apply-success') { $script:pendingReason = $reason }
-    $script:debounce.Stop(); $script:debounce.Start()
+    Start-Process -FilePath $using:psExe -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$using:self,'-RunOnce') -WindowStyle Hidden
   } catch {}
-} | Out-Null
+}
+Register-ObjectEvent -InputObject $fsw -EventName Created -Action $action | Out-Null
+Register-ObjectEvent -InputObject $fsw -EventName Changed -Action $action | Out-Null
 
-# Initial sync then idle
-Flush 'initial-sync'
-Write-Host '[RUNNING] push-on-apply: watching logs & pushing on change.' -ForegroundColor Cyan
+Write-Host '[RUNNING] push-on-apply: event-driven (-RunOnce + cooldown).' -ForegroundColor Cyan
 while ($true) { Start-Sleep -Seconds 3600 }
