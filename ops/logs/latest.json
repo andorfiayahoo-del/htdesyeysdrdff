@@ -1,7 +1,7 @@
 ﻿{
-    "updatedUtc":  "2025-08-21T08:55:29.3769267Z",
+    "updatedUtc":  "2025-08-21T08:58:41.5246487Z",
     "wroteRouter":  true,
     "wroteArchiver":  true,
-    "routerLogFile":  "patch-router_20250821-085529Z.log",
-    "archiverLogFile":  "patch-archiver_20250821-085529Z.log"
+    "routerLogFile":  "patch-router_20250821-085841Z.log",
+    "archiverLogFile":  "patch-archiver_20250821-085841Z.log"
 }
