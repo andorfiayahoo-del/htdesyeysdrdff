@@ -420,3 +420,16 @@ while ($true) {
 
 
 
+
+# ---- Archiver stub (safe) ----
+if (-not (Get-Command -Name Move-AppliedPatch -ErrorAction SilentlyContinue)) {
+  function Move-AppliedPatch([string]$fullPath,[string]$name) {
+    try {
+      if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+        Write-Log ("ARCHIVE note: external archiver handles '{0}'" -f $name) 'Y'
+      } else {
+        Write-Host ("[ARCHIVE] external archiver handles '{0}'" -f $name)
+      }
+    } catch { }
+  }
+}
