@@ -1,16 +1,29 @@
-﻿[2025-08-21T09:57:38Z] BOOT who=DESKTOP-UQ7MKQ0\ander pid=35592 pwsh=5.1.19041.6216 cwd=C:\Users\ander
-[2025-08-21T09:57:38Z] SCRIPT version=v1.7.12 path=C:\Users\ander\inbox-router.ps1
-[2025-08-21T09:57:38Z] WATCH polling: C:\Users\ander\Downloads (*.patch) debounce=1500 settle=1200 poll=500
-[2025-08-21T09:57:39Z] READY detected: 'C:\Users\ander\Downloads\patch_21936.patch' size=179 lastWriteUtc=2025-08-21T09:57:36.4582238Z
-[2025-08-21T09:57:39Z] APPLY start: patch_21936.patch
-[2025-08-21T09:57:40Z] GIT [main 3f14614] inbox: apply patch_21936.patch
-[2025-08-21T09:57:40Z] GIT  1 file changed, 2 insertions(+)
-[2025-08-21T09:57:40Z] GIT  create mode 100644 docs/E2E_PUSH_21936.txt
-[2025-08-21T09:57:40Z] GIT note: From https://github.com/andorfiayahoo-del/htdesyeysdrdff
-[2025-08-21T09:57:40Z] APPLY pull-warning: patch_21936.patch
-[2025-08-21T09:57:40Z] UNITY skip: no .cs changes in this patch
-[2025-08-21T09:57:43Z] GIT branch 'main' set up to track 'origin/main'.
-[2025-08-21T09:57:43Z] GIT note: To https://github.com/andorfiayahoo-del/htdesyeysdrdff.git
-[2025-08-21T09:57:43Z] APPLY push-warning: patch_21936.patch
-[2025-08-21T09:57:43Z] APPLY success: patch_21936.patch
-[2025-08-21T09:57:43Z] ARCHIVE note: external archiver will move patch_21936.patch
+﻿[2025-08-21T10:15:32Z] BOOT who=DESKTOP-UQ7MKQ0\ander pid=21372 pwsh=5.1.19041.6216 cwd=C:\Users\ander
+[2025-08-21T10:15:32Z] SCRIPT version=v1.7.12 path=C:\Users\ander\inbox-router.ps1
+[2025-08-21T10:15:32Z] WATCH polling: C:\Users\ander\Downloads (*.patch) debounce=1500 settle=1200 poll=500
+[2025-08-21T10:15:33Z] READY detected: 'C:\Users\ander\Downloads\patch_29869.patch' size=4528 lastWriteUtc=2025-08-21T10:09:18.5885459Z
+[2025-08-21T10:15:33Z] APPLY start: patch_29869.patch
+[2025-08-21T10:15:34Z] GIT [main c39c176] inbox: apply patch_29869.patch
+[2025-08-21T10:15:34Z] GIT  2 files changed, 36 insertions(+), 38 deletions(-)
+[2025-08-21T10:15:34Z] GIT  create mode 100644 docs/E2E_PUSH_29869.txt
+[2025-08-21T10:15:34Z] GIT note: From https://github.com/andorfiayahoo-del/htdesyeysdrdff
+[2025-08-21T10:15:34Z] APPLY pull-warning: patch_29869.patch
+[2025-08-21T10:15:34Z] UNITY skip: no .cs changes in this patch
+[2025-08-21T10:15:38Z] GIT branch 'main' set up to track 'origin/main'.
+[2025-08-21T10:15:38Z] GIT note: To https://github.com/andorfiayahoo-del/htdesyeysdrdff.git
+[2025-08-21T10:15:38Z] APPLY push-warning: patch_29869.patch
+[2025-08-21T10:15:38Z] APPLY success: patch_29869.patch
+[2025-08-21T10:15:38Z] ARCHIVE note: external archiver will move patch_29869.patch
+[2025-08-21T10:15:43Z] READY detected: 'C:\Users\ander\Downloads\patch_59311.patch' size=179 lastWriteUtc=2025-08-21T10:15:40.8610371Z
+[2025-08-21T10:15:43Z] APPLY start: patch_59311.patch
+[2025-08-21T10:15:44Z] GIT [main 4bb32a3] inbox: apply patch_59311.patch
+[2025-08-21T10:15:44Z] GIT  1 file changed, 2 insertions(+)
+[2025-08-21T10:15:44Z] GIT  create mode 100644 docs/E2E_PUSH_59311.txt
+[2025-08-21T10:15:45Z] GIT note: From https://github.com/andorfiayahoo-del/htdesyeysdrdff
+[2025-08-21T10:15:45Z] APPLY pull-warning: patch_59311.patch
+[2025-08-21T10:15:45Z] UNITY skip: no .cs changes in this patch
+[2025-08-21T10:15:48Z] GIT branch 'main' set up to track 'origin/main'.
+[2025-08-21T10:15:48Z] GIT note: To https://github.com/andorfiayahoo-del/htdesyeysdrdff.git
+[2025-08-21T10:15:48Z] APPLY push-warning: patch_59311.patch
+[2025-08-21T10:15:48Z] APPLY success: patch_59311.patch
+[2025-08-21T10:15:48Z] ARCHIVE note: external archiver will move patch_59311.patch
