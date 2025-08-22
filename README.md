@@ -53,3 +53,4 @@ _sync-stamp:
 
 
 $strict verify ping: 2025-08-22T19:34:05.3068036+02:00
+$cdn verify test 2025-08-22T22:26:35.4036130+02:00
