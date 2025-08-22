@@ -20,16 +20,19 @@ This repository and the local folder **must always be in sync**:
 
 <!-- sync-stamp: 2025-08-22T08:02:11.505Z -->
 
-<!--  -->
-### Sync Guard (no timers)
+<!-- REPAIR-RECONNECT:BEGIN -->
+### Quick Repair / Reconnect (no timers)
+If Git disconnects (you’ll see ops/live/GIT-DISCONNECTED.txt or GIT_HEALTH_FAIL in ops/live/push-flush.log):
 
-- **post-commit hook:** auto-push to origin main.
-- **pre-push hook:** runs Health Guard; blocks bad pushes.
-- **flush wrapper:** after router apply, performs an opportunistic sync.
+1) Open PowerShell in C:\Users\ander\My project
+2) Run:  
+   pwsh -NoProfile -ExecutionPolicy Bypass -File tools\ops\repair-reconnect.ps1
+3) Re-run the patch → apply → push loop.
 
-_sync-stamp: 
-
-<!--  -->
+This repo uses event-driven guards:
+- **pre-push** runs a Git **health check** (blocks bad pushes)
+- **post-commit** auto-pushes to origin main
+<!-- REPAIR-RECONNECT:END -->
 
 
 $hook test: 2025-08-22T12:46:51.3808961+02:00
