@@ -1,3 +1,9 @@
+<!-- HANDOVER-BANNER v1 -->
+> 🚨 **MANDATORY FOR ALL ASSISTANTS:** Read **ALL** handover materials **before doing anything**.
+> Start here → **[handover/Handover-Instructions.md](handover/Handover-Instructions.md)**
+> Local folder C:\Users\ander\My project and this GitHub repo **must ALWAYS be in sync**.
+> Loop (event-driven, **no timers**): **patch → apply → push**.
+<!-- /HANDOVER-BANNER -->
 # Handover Instructions (Source of Truth)
 
 **READ THIS ENTIRE FILE.** It is the operational contract for assistants.
@@ -26,3 +32,16 @@
 - Assistants only read logs via GitHub; no local access requests.
 
 <!-- sync-stamp: 2025-08-22T08:02:11.505Z -->
+
+<!--  -->
+### Sync Guard (no timers)
+
+- **post-commit hook:** auto-push to origin main.
+- **pre-push hook:** runs Health Guard; blocks bad pushes.
+- **flush wrapper:** after router apply, performs an opportunistic sync.
+
+_sync-stamp: 
+
+<!--  -->
+
+

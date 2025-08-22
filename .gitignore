@@ -1,4 +1,4 @@
-﻿[Ll]ibrary/
+[Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
@@ -37,3 +37,4 @@ GatewayCJS/.env
 
 !Assets/Logs/
 !Assets/Logs/*.log
+Library/
