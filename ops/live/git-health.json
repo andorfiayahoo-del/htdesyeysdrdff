@@ -1,30 +1,30 @@
 {
-  "repoRoot": "C:\\Users\\ander\\My project",
-  "ok": true,
-  "remoteName": "origin",
+  "utc": "2025-08-22T12:41:28.1775375Z",
   "checks": [
     {
+      "detail": "ok",
       "ok": true,
-      "name": "RepoRootExists",
-      "detail": "ok"
+      "name": "RepoRootExists"
     },
     {
+      "detail": "ok",
       "ok": true,
-      "name": "IsInsideWorkTree",
-      "detail": "ok"
+      "name": "IsInsideWorkTree"
     },
     {
+      "detail": "https://github.com/andorfiayahoo-del/htdesyeysdrdff.git",
       "ok": true,
-      "name": "RemotePresent",
-      "detail": "https://github.com/andorfiayahoo-del/htdesyeysdrdff.git"
+      "name": "RemotePresent"
     },
     {
+      "detail": "ok",
       "ok": true,
-      "name": "RemoteReachable",
-      "detail": "ok"
+      "name": "RemoteReachable"
     }
   ],
-  "utc": "2025-08-22T10:42:46.0414289Z",
+  "repoRoot": "C:\\Users\\ander\\My project",
+  "failureReason": null,
   "branchName": "main",
-  "failureReason": null
+  "remoteName": "origin",
+  "ok": true
 }
