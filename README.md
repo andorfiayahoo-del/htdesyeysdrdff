@@ -36,3 +36,19 @@ This repo uses event-driven guards:
 
 
 $hook test: 2025-08-22T12:46:51.3808961+02:00
+
+<!--  -->
+### Access Flow (no agent tools required)
+Assistants must access the repo via public GitHub URLs (blob/raw), like any website:
+- Repo: https://github.com/andorfiayahoo-del/htdesyeysdrdff
+- RAW base: https://raw.githubusercontent.com/andorfiayahoo-del/htdesyeysdrdff/main
+
+Do **not** depend on ChatGPT agent/browser integrations. If browsing tools are unavailable,
+state clearly: “I'll use the public raw/blob URLs instead.”
+_sync-stamp: 
+<!--  -->
+
+
+
+
+
