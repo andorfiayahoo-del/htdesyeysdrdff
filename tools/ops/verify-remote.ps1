@@ -9,53 +9,52 @@ param(
   [int]   $MaxWaitSec   = 600,
   [int]   $PollSec      = 2
 )
-$ErrorActionPreference='Stop'
+$ErrorActionPreference = "Stop"
 
 function LogF([string]$m){
   try{
-    $ts=[DateTime]::UtcNow.ToString('o')
-    Add-Content -LiteralPath (Join-Path $LiveDir 'push-flush.log') -Value "[$ts] $m" -Encoding UTF8
+    $ts=[DateTime]::UtcNow.ToString("o")
+    Add-Content -LiteralPath (Join-Path $LiveDir "push-flush.log") -Value "[$ts] $m" -Encoding UTF8
   }catch{}
 }
 function Sha256Bytes([byte[]]$bytes){
   $sha=[System.Security.Cryptography.SHA256]::Create()
-  try{ return ([System.BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant() }
+  try{ ([System.BitConverter]::ToString($sha.ComputeHash($bytes))).Replace("-","").ToLowerInvariant() }
   finally{ $sha.Dispose() }
 }
-# FIX HERE: use $argv instead of $args so we don't shadow PowerShell's automatic $args.
+# IMPORTANT: do not shadow $args; take argv explicitly
 function GitExec([string[]]$argv){
   try{
     $text = & git @argv 2>&1
     $code = $LASTEXITCODE
     $out  = ($text | Out-String)
-    return @{ out=$out; err=''; code=$code }
+    return @{ out=$out; err=""; code=$code }
   } catch {
-    return @{ out=''; err=$_.Exception.Message; code=9001 }
+    return @{ out=""; err=$_.Exception.Message; code=9001 }
   }
 }
 function GitOutSafe([string[]]$argv,[string]$tag){
   $r = GitExec $argv
-  if($r.code -ne 0){ LogF ("VERIFY_GIT_ERR tag={0} code={1} out={2}" -f $tag,$r.code, ($r.out.Trim() -replace "`r|`n",' ')) }
-  else{ LogF ("VERIFY_GIT_OK tag={0} out={1}" -f $tag, ($r.out.Trim() -replace "`r|`n",' ')) }
+  if($r.code -ne 0){ LogF ("VERIFY_GIT_ERR tag={0} code={1} out={2}" -f $tag,$r.code, ($r.out.Trim() -replace "`r|`n"," ")) }
+  else{ LogF ("VERIFY_GIT_OK tag={0} out={1}" -f $tag, ($r.out.Trim() -replace "`r|`n"," ")) }
   return $r
 }
 function GitBlobBytes([string]$commitSha,[string]$relPath){
-  $spec = ('{0}:{1}' -f $commitSha, $relPath)
-  $quotedSpec = '"' + ($spec -replace '"','""') + '"'
+  $spec = ("{0}:{1}" -f $commitSha, $relPath)
   $psi=[System.Diagnostics.ProcessStartInfo]::new()
-  $psi.FileName='git'
+  $psi.FileName="git"
   $psi.UseShellExecute=$false
   $psi.RedirectStandardOutput=$true
   $psi.RedirectStandardError=$true
   $psi.CreateNoWindow=$true
   $psi.WorkingDirectory=$RepoRoot
-  $psi.Arguments = 'show ' + $quotedSpec
+  $psi.Arguments = 'show "' + ($spec -replace '"' , '""') + '"'
   $p=[System.Diagnostics.Process]::Start($psi)
   $ms=New-Object System.IO.MemoryStream
   $p.StandardOutput.BaseStream.CopyTo($ms); $p.WaitForExit() | Out-Null
   if($p.ExitCode -ne 0){
     $err = $p.StandardError.ReadToEnd()
-    LogF ("VERIFY_GIT_ERR tag=git-show code={0} err={1}" -f $p.ExitCode, ($err -replace "`r|`n",' '))
+    LogF ("VERIFY_GIT_ERR tag=git-show code={0} err={1}" -f $p.ExitCode, ($err -replace "`r|`n"," "))
     return $null
   }
   $ms.ToArray()
@@ -63,27 +62,27 @@ function GitBlobBytes([string]$commitSha,[string]$relPath){
 function FetchRawBytes([string]$url){
   $tmp=[System.IO.Path]::GetTempFileName()
   try{
-    Invoke-WebRequest -Uri $url -TimeoutSec 30 -Headers @{ 'Cache-Control'='no-cache' } -OutFile $tmp | Out-Null
+    Invoke-WebRequest -Uri $url -TimeoutSec 30 -Headers @{ "Cache-Control"="no-cache" } -OutFile $tmp | Out-Null
     [System.IO.File]::ReadAllBytes($tmp)
   } catch { $null } finally { try{ Remove-Item -Force $tmp -ErrorAction SilentlyContinue }catch{} }
 }
 function RawUrl([string]$owner,[string]$repo,[string]$branch,[string]$relPath){
-  $parts = $relPath -split '[\\/]' | Where-Object { $_ -ne '' } | ForEach-Object { [System.Uri]::EscapeDataString($_) }
-  "https://raw.githubusercontent.com/$owner/$repo/$branch/" + ($parts -join '/')
+  $parts = $relPath -split '[\\/]+' | Where-Object { $_ -ne "" } | ForEach-Object { [System.Uri]::EscapeDataString($_) }
+  "https://raw.githubusercontent.com/$owner/$repo/$branch/" + ($parts -join "/")
 }
 
 Push-Location -LiteralPath $RepoRoot
-try {
+try{
   try {
     $gitPath = (Get-Command git -ErrorAction Stop).Source
     LogF ("VERIFY_ENV git={0}" -f $gitPath)
   } catch { LogF ("VERIFY_ENV_NO_GIT msg={0}" -f $_.Exception.Message); exit 1 }
 
   $isInside = $false
-  $p1 = GitOutSafe @('rev-parse','--is-inside-work-tree') 'rev-parse-is-inside'
-  if($p1.code -eq 0 -and $p1.out.Trim().ToLowerInvariant() -eq 'true'){ $isInside=$true }
+  $p1 = GitOutSafe @("rev-parse","--is-inside-work-tree") "rev-parse-is-inside"
+  if($p1.code -eq 0 -and $p1.out.Trim().ToLowerInvariant() -eq "true"){ $isInside=$true }
   if(-not $isInside){
-    $p2 = GitOutSafe @('rev-parse','--git-dir') 'rev-parse-git-dir'
+    $p2 = GitOutSafe @("rev-parse","--git-dir") "rev-parse-git-dir"
     if($p2.code -eq 0 -and -not [string]::IsNullOrWhiteSpace($p2.out)){
       $gitDir = $p2.out.Trim(); if(-not (Split-Path $gitDir -IsAbsolute)){ $gitDir = Join-Path $RepoRoot $gitDir }
       if(Test-Path -LiteralPath $gitDir){ $isInside = $true }
@@ -91,7 +90,7 @@ try {
     }
   }
   if(-not $isInside){
-    $p3 = GitOutSafe @('rev-parse','--show-toplevel') 'rev-parse-show-toplevel'
+    $p3 = GitOutSafe @("rev-parse","--show-toplevel") "rev-parse-show-toplevel"
     if($p3.code -eq 0 -and -not [string]::IsNullOrWhiteSpace($p3.out)){
       $top=[System.IO.Path]::GetFullPath($p3.out.Trim()); $root=[System.IO.Path]::GetFullPath($RepoRoot)
       LogF ("VERIFY_PROBE toplevel={0} root={1}" -f $top,$root)
@@ -99,38 +98,51 @@ try {
     }
   }
   if(-not $isInside){
-    $dotGit = Join-Path $RepoRoot '.git'
+    $dotGit = Join-Path $RepoRoot ".git"
     LogF ("VERIFY_PROBE dotgit={0} exists={1}" -f $dotGit,(Test-Path -LiteralPath $dotGit))
     if(Test-Path -LiteralPath $dotGit){ $isInside=$true }
   }
   if(-not $isInside){ LogF "VERIFY_ENV_NOT_WORKTREE (no probe succeeded)"; exit 1 } else { LogF "VERIFY_ENV_WORKTREE_OK" }
 
-  $localR  = GitOutSafe @('rev-parse','HEAD') 'rev-parse-HEAD'
+  $localR  = GitOutSafe @("rev-parse","HEAD") "rev-parse-HEAD"
   $localSha= $localR.out.Trim()
-  $remoteR = GitOutSafe @('ls-remote',$RemoteName,("refs/heads/$Branch")) 'ls-remote'
+  $remoteR = GitOutSafe @("ls-remote",$RemoteName,("refs/heads/$Branch")) "ls-remote"
   $remote  = $remoteR.out.Trim()
-  $remoteSha = if([string]::IsNullOrWhiteSpace($remote)){ '' } else { ($remote -split '\s+')[0] }
+  $remoteSha = if([string]::IsNullOrWhiteSpace($remote)){ "" } else { ($remote -split "\s+")[0] }
 
-  LogF "VERIFY_BEGIN local=$localSha remote=$remoteSha branch=$Branch repo=$Owner/$Repo"
+  LogF ("VERIFY_BEGIN local={0} remote={1} branch={2} repo={3}/{4}" -f $localSha,$remoteSha,$Branch,$Owner,$Repo)
 
   if([string]::IsNullOrWhiteSpace($remoteSha) -or $remoteSha -ne $localSha){
-    LogF "VERIFY_FAIL_REF local=$localSha remote=$remoteSha"
+    LogF ("VERIFY_FAIL_REF local={0} remote={1}" -f $localSha,$remoteSha)
     exit 2
   }
 
-  $changed = @()
+  # Changed files via --name-status; skip D(eletes); take new path for R/C; filter noise
+  $linesOut = @()
   if($OldRemoteSha -and $OldRemoteSha.Length -ge 7){
-    $diffR = GitOutSafe @('diff','--name-only',$OldRemoteSha,$localSha) 'diff-range'
-    $changed = ($diffR.out -split "`r?`n")
+    $diffR = GitOutSafe @("diff","--name-status",$OldRemoteSha,$localSha) "diff-name-status-range"
+    $linesOut = @($diffR.out -split "`r?`n")
   } else {
-    $treeR = GitOutSafe @('diff-tree','--no-commit-id','--name-only','-r',$localSha) 'diff-tree'
-    $changed = ($treeR.out -split "`r?`n")
+    $treeR = GitOutSafe @("diff-tree","--no-commit-id","--name-status","-r",$localSha) "diff-tree-name-status"
+    $linesOut = @($treeR.out -split "`r?`n")
   }
-  $changed = @($changed | Where-Object { $_ -and $_ -notmatch '^(Library/|ops/live/)' })
+  $changed = @()
+  foreach($ln in $linesOut){
+    if([string]::IsNullOrWhiteSpace($ln)){ continue }
+    $parts = $ln -split "`t"
+    if($parts.Length -lt 2){ continue }
+    $code = $parts[0]
+    if($code -like "D*"){ continue }
+    if($code -like "R*" -or $code -like "C*"){ $p = $parts[-1] } else { $p = $parts[1] }
+    if([string]::IsNullOrWhiteSpace($p)){ continue }
+    if($p -match "^(Library/|ops/live/)"){ continue }
+    $changed += ,$p
+  }
+  $changed = @($changed | Select-Object -Unique)
   LogF ("VERIFY_CHANGED_COUNT={0}" -f $changed.Count)
-  if($changed.Count -gt 0){ LogF ("VERIFY_CHANGED_SAMPLE={0}" -f (($changed | Select-Object -First 10) -join ', ')) }
+  if($changed.Count -gt 0){ LogF ("VERIFY_CHANGED_SAMPLE={0}" -f (($changed | Select-Object -First 10) -join ", ")) }
 
-  if($changed.Count -eq 0){ LogF "VERIFY_NO_CHANGED_FILES local=$localSha"; exit 0 }
+  if($changed.Count -eq 0){ LogF ("VERIFY_NO_CHANGED_FILES local={0}" -f $localSha); exit 0 }
 
   $t0=[DateTime]::UtcNow; $allOk=$true
   foreach($rel in $changed){
@@ -149,7 +161,7 @@ try {
       else{ LogF ("VERIFY_WAIT_CDN path={0} status=HASH_MISMATCH want={1} got={2} elapsed={3}/{4}s" -f $rel,$expectSha,$gotSha,$elapsed,$MaxWaitSec); Start-Sleep -Seconds $PollSec }
     }
   }
-  if($allOk){ LogF "VERIFY_STRICT_OK commit=$localSha"; exit 0 } else { LogF "VERIFY_STRICT_FAIL commit=$localSha"; exit 3 }
+  if($allOk){ LogF ("VERIFY_STRICT_OK commit={0}" -f $localSha); exit 0 } else { LogF ("VERIFY_STRICT_FAIL commit={0}" -f $localSha); exit 3 }
 }
 catch {
   $t = $_.Exception.GetType().FullName

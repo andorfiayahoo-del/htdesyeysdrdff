@@ -239,3 +239,23 @@ See 'git help git' for an overview of the system. remote=usage:
 [2025-08-23T10:03:26.6070230Z] VERIFY_CHANGED_SAMPLE=tools/ops/here-string-demo.txt
 [2025-08-23T10:03:26.6785345Z] VERIFY_SKIP path=tools/ops/here-string-demo.txt reason=blob-missing
 [2025-08-23T10:03:26.6972585Z] VERIFY_STRICT_FAIL commit=94557c7d685a9e72e6cf4d08abff20eb91a5b392
+[2025-08-23T10:14:22.4365508Z] GIT_SYNC_COMMIT_OK
+[2025-08-23T10:14:23.8719680Z] GIT_SYNC_PUSH_OK
+[2025-08-23T10:14:23.8863027Z] GIT_VERIFY_PATH_EXISTS=True len=7146 path=C:\Users\ander\My project\tools\ops\verify-remote.ps1
+[2025-08-23T10:14:23.8983976Z] GIT_VERIFY_PWSH=C:\Program Files\PowerShell\7\pwsh.exe
+[2025-08-23T10:14:23.9121443Z] GIT_VERIFY_ARGV=-NoProfile -ExecutionPolicy Bypass -File "C:\Users\ander\My project\tools\ops\verify-remote.ps1" -RepoRoot "C:\Users\ander\My project" -LiveDir "C:\Users\ander\My project\ops\live" -Owner andorfiayahoo-del -Repo htdesyeysdrdff -Branch main -RemoteName origin -OldRemoteSha 94557c7d685a9e72e6cf4d08abff20eb91a5b392
+[2025-08-23T10:14:23.9205685Z] GIT_VERIFY_RUN
+[2025-08-23T10:14:24.9798915Z] GIT_VERIFY_EXIT=64
+[2025-08-23T10:14:24.9897099Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
+[2025-08-23T10:34:26.1059490Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-23T10:34:26.1862647Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-23T10:34:26.1984197Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-23T10:34:26.2421188Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=01d5eae639fefe085da29141d7f3a9fc4e4456dd
+[2025-08-23T10:34:26.7220764Z] VERIFY_GIT_OK tag=ls-remote out=01d5eae639fefe085da29141d7f3a9fc4e4456dd	refs/heads/main
+[2025-08-23T10:34:26.7338393Z] VERIFY_BEGIN local=01d5eae639fefe085da29141d7f3a9fc4e4456dd remote=01d5eae639fefe085da29141d7f3a9fc4e4456dd branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-23T10:34:26.7872053Z] VERIFY_GIT_OK tag=diff-tree-name-status out=M	ops/live/push-flush.log  M	tools/ops/here-string-demo.txt  A	tools/ops/vpushcheck.ps1
+[2025-08-23T10:34:26.8034082Z] VERIFY_CHANGED_COUNT=2
+[2025-08-23T10:34:26.8136861Z] VERIFY_CHANGED_SAMPLE=tools/ops/here-string-demo.txt, tools/ops/vpushcheck.ps1
+[2025-08-23T10:34:27.1666196Z] VERIFY_OK path=tools/ops/here-string-demo.txt sha=3a8bb70ac0b83f09fbf2e8f99b077faf4a00e234128133bb34e8f924c869760a elapsed=0s
+[2025-08-23T10:34:27.3640493Z] VERIFY_OK path=tools/ops/vpushcheck.ps1 sha=bc537d9e9aa6f326d524ec73e2f3182eabcab7552729fe721a73fec56915e54f elapsed=0s
+[2025-08-23T10:34:27.3730265Z] VERIFY_STRICT_OK commit=01d5eae639fefe085da29141d7f3a9fc4e4456dd
