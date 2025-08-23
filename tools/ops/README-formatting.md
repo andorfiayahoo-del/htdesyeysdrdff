@@ -7,9 +7,9 @@ Push → wait for GitHub RAW CDN → byte-for-byte SHA-256 match. Do **not** swa
 ## TL;DR
 - Always include the explicit repo `cd` line at the top of any instructions.
 - Use `git vpush` (configured in this repo) to push + strict verify. Do **not** replace this with a faster “industry standard” shortcut.
-- Always close markdown code fences. If your snippet contains triple backticks inside, either wrap the outer block with tildes (`~~~`) or use a longer backtick fence (e.g. five) for the outer block.
-- When generating files from PowerShell, prefer **array-of-lines + Set-Content** over here-strings to avoid quoting traps.
-- If you must use here-strings, ensure both opening `@'` and closing `'@` are present on their own lines with no trailing spaces.
+- Always close markdown code fences. If your snippet contains triple backticks inside, either wrap the outer block with tildes (`~~~`) or use a longer backtick fence for the outer block.
+- When generating files from PowerShell, prefer **array-of-lines + Set-Content** (joined to one string) over here-strings to avoid quoting traps.
+- If you must use here-strings, ensure both opening `@''` and closing `''@` are present on their own lines with no trailing spaces.
 
 ---
 ## Quick start (PowerShell 7)
@@ -29,7 +29,8 @@ $lines = @(
   'First line',
   'Second line',
 )
-Set-Content -LiteralPath '.\some\file.txt' -Value $lines -Encoding utf8
+[string]$text = [string]::Join("`r`n", $lines)
+Set-Content -LiteralPath '.\some\file.txt' -Value $text -Encoding utf8
 ```
 
 ### 2) If you must embed a here-string, include both terminators
