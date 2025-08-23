@@ -330,3 +330,11 @@ See 'git help git' for an overview of the system. remote=usage:
 [2025-08-23T12:22:32.3519332Z] GIT_VERIFY_RUN
 [2025-08-23T12:22:33.4077746Z] GIT_VERIFY_EXIT=64
 [2025-08-23T12:22:33.4177241Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
+[2025-08-23T12:22:35.0738681Z] GIT_SYNC_COMMIT_OK
+[2025-08-23T12:22:36.5102248Z] GIT_SYNC_PUSH_OK
+[2025-08-23T12:22:36.5247700Z] GIT_VERIFY_PATH_EXISTS=True len=7789 path=C:\Users\ander\My project\tools\ops\verify-remote.ps1
+[2025-08-23T12:22:36.5373936Z] GIT_VERIFY_PWSH=C:\Program Files\PowerShell\7\pwsh.exe
+[2025-08-23T12:22:36.5523077Z] GIT_VERIFY_ARGV=-NoProfile -ExecutionPolicy Bypass -File "C:\Users\ander\My project\tools\ops\verify-remote.ps1" -RepoRoot "C:\Users\ander\My project" -LiveDir "C:\Users\ander\My project\ops\live" -Owner andorfiayahoo-del -Repo htdesyeysdrdff -Branch main -RemoteName origin -OldRemoteSha c4d30e857fd60d7189fa5165eb5c9353529d87a7
+[2025-08-23T12:22:36.5609150Z] GIT_VERIFY_RUN
+[2025-08-23T12:22:37.6248868Z] GIT_VERIFY_EXIT=64
+[2025-08-23T12:22:37.6345267Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
