@@ -17,18 +17,30 @@ try {
   & git rev-parse --is-inside-work-tree *> $null
   if ($LASTEXITCODE -ne 0) { throw "Not a git work tree: $RepoRoot" }
 
-  # 1) Push + strict RAW verify (this blocks until RAW serves exact bytes)
+  # 1) Push + strict RAW verify (blocks until RAW serves exact bytes)
   git -C "$RepoRoot" vpush
   $head = (& git rev-parse HEAD 2>&1).Trim()
   OK "Strict verify passed for HEAD=$head"
 
-  # 2) Determine files to check (changed in HEAD unless explicit RelPaths provided)
+  # 2) Determine files to check
   $targets = @()
   if ($RelPaths -and $RelPaths.Count -gt 0) {
     $targets = $RelPaths
   } else {
-    $list = (& git diff-tree --no-commit-id --name-only -r HEAD 2>&1)
-    $targets = @($list -split "`r?`n" | Where-Object { $_ -and $_ -notmatch "^(Library/|ops/live/)" })
+    # Use name-status with rename/copy detection; skip deletes; take NEW path for R/C
+    $lines = (& git diff-tree --no-commit-id --name-status -r -M -C HEAD 2>&1) -split "`r?`n"
+    foreach($ln in $lines){
+      if([string]::IsNullOrWhiteSpace($ln)){ continue }
+      $parts = $ln -split "`t"
+      if($parts.Length -lt 2){ continue }
+      $code = $parts[0]
+      if($code -like "D*"){ continue } # skip deletes entirely
+      $p = if($code -like "R*" -or $code -like "C*"){ $parts[-1] } else { $parts[1] }
+      if([string]::IsNullOrWhiteSpace($p)){ continue }
+      if($p -match "^(Library/|ops/live/)"){ continue }
+      $targets += ,$p
+    }
+    $targets = @($targets | Select-Object -Unique)
   }
   if ($targets.Count -eq 0) { WARN "No changed files to check."; exit 0 }
 
@@ -41,8 +53,7 @@ try {
               '-Owner', $Owner, '-Repo', $Repo, '-Branch', $Branch)
     if ($NoNormalizeWorkingFile) { $args += '-NoNormalizeWorkingFile' }
     & pwsh -NoProfile -ExecutionPolicy Bypass @args
-    $code = $LASTEXITCODE
-    if ($code -eq 3) { $anyMismatch = $true }
+    if ($LASTEXITCODE -eq 3) { $anyMismatch = $true }
   }
   if ($anyMismatch) { ERR "One or more files mismatched."; exit 3 }
   OK "All checked files match blob + RAW."; exit 0

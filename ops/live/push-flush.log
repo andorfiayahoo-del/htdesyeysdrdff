@@ -267,3 +267,18 @@ See 'git help git' for an overview of the system. remote=usage:
 [2025-08-23T10:41:28.0153046Z] GIT_VERIFY_RUN
 [2025-08-23T10:41:29.0777160Z] GIT_VERIFY_EXIT=64
 [2025-08-23T10:41:29.0905923Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
+[2025-08-23T10:41:31.5227223Z] GIT_SYNC_COMMIT_OK
+[2025-08-23T10:41:32.9735850Z] GIT_SYNC_PUSH_OK
+[2025-08-23T10:41:32.9887387Z] GIT_VERIFY_PATH_EXISTS=True len=7845 path=C:\Users\ander\My project\tools\ops\verify-remote.ps1
+[2025-08-23T10:41:33.0011289Z] GIT_VERIFY_PWSH=C:\Program Files\PowerShell\7\pwsh.exe
+[2025-08-23T10:41:33.0147555Z] GIT_VERIFY_ARGV=-NoProfile -ExecutionPolicy Bypass -File "C:\Users\ander\My project\tools\ops\verify-remote.ps1" -RepoRoot "C:\Users\ander\My project" -LiveDir "C:\Users\ander\My project\ops\live" -Owner andorfiayahoo-del -Repo htdesyeysdrdff -Branch main -RemoteName origin -OldRemoteSha 4f7541866488dc8985b42d8b834fcba34ccab0c4
+[2025-08-23T10:41:33.0238215Z] GIT_VERIFY_RUN
+[2025-08-23T10:41:34.0781752Z] GIT_VERIFY_EXIT=64
+[2025-08-23T10:41:34.0968733Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
+[2025-08-23T10:41:34.8055822Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-23T10:41:34.8812837Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-23T10:41:34.8932655Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-23T10:41:34.9373365Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=f61710ac39da09e85c4a215a67b6c53be999ab4f
+[2025-08-23T10:41:35.4079908Z] VERIFY_GIT_OK tag=ls-remote out=ef417b45ea14a660ab999d719b57e1885737fcd1	refs/heads/main
+[2025-08-23T10:41:35.4229990Z] VERIFY_BEGIN local=f61710ac39da09e85c4a215a67b6c53be999ab4f remote=ef417b45ea14a660ab999d719b57e1885737fcd1 branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-23T10:41:35.4331469Z] VERIFY_FAIL_REF local=f61710ac39da09e85c4a215a67b6c53be999ab4f remote=ef417b45ea14a660ab999d719b57e1885737fcd1
