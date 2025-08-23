@@ -57,3 +57,11 @@ Write-Host 'Inner fenced block example'
 ---
 ## Our stance on wait-for-lag
 We intentionally wait for RAW to serve the exact bytes before declaring success. It is sturdier than “instant” checks and avoids stale edges. Future automation must preserve this behavior.
+
+---
+## One-command flow (always use this)
+```powershell
+Set-Location -LiteralPath "C:\Users\ander\My project"
+git vpushcheck
+```
+This pushes, waits for RAW to serve the exact bytes, **then** runs local blob/working/RAW integrity checks on changed files.
