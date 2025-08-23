@@ -18,11 +18,11 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Not a git work tree: $RepoRoot" }
 
   # 0) Remember HEAD BEFORE push (so we can diff that..HEAD later)
-  $preHead = (& git rev-parse HEAD 2>&1).Trim()
+  $preHead = (& git rev-parse HEAD 2>$null).Trim()
 
   # 1) Push + strict RAW verify (blocks until RAW serves exact bytes)
   git -C "$RepoRoot" vpush
-  $head = (& git rev-parse HEAD 2>&1).Trim()
+  $head = (& git rev-parse HEAD 2>$null).Trim()
   OK "Strict verify passed for HEAD=$head"
 
   # 2) Determine files to check
@@ -30,21 +30,41 @@ try {
   if ($RelPaths -and $RelPaths.Count -gt 0) {
     $targets = $RelPaths
   } else {
-    # Use range diff (preHead..HEAD) so an extra log-only commit at HEAD doesn't mask real changes
-    $nameStatus = (& git diff --name-status -M -C $preHead..$head 2>&1) -split "`r?`n"
-    foreach($ln in $nameStatus){
-      if([string]::IsNullOrWhiteSpace($ln)){ continue }
-      $parts = $ln -split "`t"
-      if($parts.Length -lt 2){ continue }
-      $code = $parts[0]
-      if($code -like "D*"){ continue } # skip deletes entirely
-      $p = if($code -like "R*" -or $code -like "C*"){ $parts[-1] } else { $parts[1] }
-      if([string]::IsNullOrWhiteSpace($p)){ continue }
-      if($p -match "^(Library/|ops/live/)"){ continue }
+    # NUL-separated, rename/copy detection on; diff range preHead..HEAD (avoids log-only commit noise)
+    $raw = (& git diff --name-status -z -M -C "$preHead..$head" 2>$null)
+    if ($LASTEXITCODE -ne 0) { $raw = @() }
+    $joined = if ($raw -is [array]) { [string]::Concat($raw) } else { [string]$raw }
+    $tok = $joined -split "`0", [System.StringSplitOptions]::RemoveEmptyEntries
+
+    # Walk tokens: STATUS then 1 (A/M/T/…) or 2 paths (R*/C*)
+    for ($i = 0; $i -lt $tok.Length; ) {
+      $code = $tok[$i]; $i++
+      if ([string]::IsNullOrWhiteSpace($code)) { continue }
+
+      # Skip deletes entirely
+      if ($code -like "D*") {
+        # consumes one path for D
+        if ($i -lt $tok.Length) { $i++ }
+        continue
+      }
+
+      if ($code -like "R*" -or $code -like "C*") {
+        # rename/copy => old, new
+        if ($i + 1 -ge $tok.Length) { break }
+        $oldPath = $tok[$i]; $newPath = $tok[$i+1]; $i += 2
+        $p = $newPath
+      } else {
+        if ($i -ge $tok.Length) { break }
+        $p = $tok[$i]; $i++
+      }
+
+      if ([string]::IsNullOrWhiteSpace($p)) { continue }
+      if ($p -match "^(Library/|ops/live/)") { continue }
       $targets += ,$p
     }
     $targets = @($targets | Select-Object -Unique)
   }
+
   if ($targets.Count -eq 0) { WARN "No changed files to check."; exit 0 }
 
   # 3) Check each file: blob vs working vs RAW
