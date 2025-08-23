@@ -220,3 +220,22 @@ See 'git help git' for an overview of the system. remote=usage:
 [2025-08-23T09:54:03.8161059Z] GIT_VERIFY_RUN
 [2025-08-23T09:54:04.8796202Z] GIT_VERIFY_EXIT=64
 [2025-08-23T09:54:04.8995180Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
+[2025-08-23T09:58:51.6319849Z] GIT_SYNC_COMMIT_OK
+[2025-08-23T09:58:53.0526907Z] GIT_SYNC_PUSH_OK
+[2025-08-23T09:58:53.0669577Z] GIT_VERIFY_PATH_EXISTS=True len=7146 path=C:\Users\ander\My project\tools\ops\verify-remote.ps1
+[2025-08-23T09:58:53.0798011Z] GIT_VERIFY_PWSH=C:\Program Files\PowerShell\7\pwsh.exe
+[2025-08-23T09:58:53.0937413Z] GIT_VERIFY_ARGV=-NoProfile -ExecutionPolicy Bypass -File "C:\Users\ander\My project\tools\ops\verify-remote.ps1" -RepoRoot "C:\Users\ander\My project" -LiveDir "C:\Users\ander\My project\ops\live" -Owner andorfiayahoo-del -Repo htdesyeysdrdff -Branch main -RemoteName origin -OldRemoteSha 2485540be8c38a26181ff70d142171f804db14b9
+[2025-08-23T09:58:53.1022608Z] GIT_VERIFY_RUN
+[2025-08-23T09:58:54.1706149Z] GIT_VERIFY_EXIT=64
+[2025-08-23T09:58:54.1840993Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
+[2025-08-23T10:03:25.9058384Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-23T10:03:25.9849959Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-23T10:03:25.9967077Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-23T10:03:26.0409297Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=94557c7d685a9e72e6cf4d08abff20eb91a5b392
+[2025-08-23T10:03:26.5049947Z] VERIFY_GIT_OK tag=ls-remote out=94557c7d685a9e72e6cf4d08abff20eb91a5b392	refs/heads/main
+[2025-08-23T10:03:26.5168933Z] VERIFY_BEGIN local=94557c7d685a9e72e6cf4d08abff20eb91a5b392 remote=94557c7d685a9e72e6cf4d08abff20eb91a5b392 branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-23T10:03:26.5682998Z] VERIFY_GIT_OK tag=diff-tree out=ops/live/push-flush.log  tools/ops/here-string-demo.txt
+[2025-08-23T10:03:26.5937899Z] VERIFY_CHANGED_COUNT=1
+[2025-08-23T10:03:26.6070230Z] VERIFY_CHANGED_SAMPLE=tools/ops/here-string-demo.txt
+[2025-08-23T10:03:26.6785345Z] VERIFY_SKIP path=tools/ops/here-string-demo.txt reason=blob-missing
+[2025-08-23T10:03:26.6972585Z] VERIFY_STRICT_FAIL commit=94557c7d685a9e72e6cf4d08abff20eb91a5b392

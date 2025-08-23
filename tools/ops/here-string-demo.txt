@@ -1,0 +1,3 @@
+# Demo using PowerShell here-strings
+This file proves the closing '@ is present.
+"Stamp: $stamp" (shown literally if treated as text in a single-quoted here-string)
