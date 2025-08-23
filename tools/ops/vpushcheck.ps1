@@ -17,6 +17,9 @@ try {
   & git rev-parse --is-inside-work-tree *> $null
   if ($LASTEXITCODE -ne 0) { throw "Not a git work tree: $RepoRoot" }
 
+  # 0) Remember HEAD BEFORE push (so we can diff that..HEAD later)
+  $preHead = (& git rev-parse HEAD 2>&1).Trim()
+
   # 1) Push + strict RAW verify (blocks until RAW serves exact bytes)
   git -C "$RepoRoot" vpush
   $head = (& git rev-parse HEAD 2>&1).Trim()
@@ -27,9 +30,9 @@ try {
   if ($RelPaths -and $RelPaths.Count -gt 0) {
     $targets = $RelPaths
   } else {
-    # Use name-status with rename/copy detection; skip deletes; take NEW path for R/C
-    $lines = (& git diff-tree --no-commit-id --name-status -r -M -C HEAD 2>&1) -split "`r?`n"
-    foreach($ln in $lines){
+    # Use range diff (preHead..HEAD) so an extra log-only commit at HEAD doesn't mask real changes
+    $nameStatus = (& git diff --name-status -M -C $preHead..$head 2>&1) -split "`r?`n"
+    foreach($ln in $nameStatus){
       if([string]::IsNullOrWhiteSpace($ln)){ continue }
       $parts = $ln -split "`t"
       if($parts.Length -lt 2){ continue }
