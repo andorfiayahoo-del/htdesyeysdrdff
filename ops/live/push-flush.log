@@ -259,3 +259,11 @@ See 'git help git' for an overview of the system. remote=usage:
 [2025-08-23T10:34:27.1666196Z] VERIFY_OK path=tools/ops/here-string-demo.txt sha=3a8bb70ac0b83f09fbf2e8f99b077faf4a00e234128133bb34e8f924c869760a elapsed=0s
 [2025-08-23T10:34:27.3640493Z] VERIFY_OK path=tools/ops/vpushcheck.ps1 sha=bc537d9e9aa6f326d524ec73e2f3182eabcab7552729fe721a73fec56915e54f elapsed=0s
 [2025-08-23T10:34:27.3730265Z] VERIFY_STRICT_OK commit=01d5eae639fefe085da29141d7f3a9fc4e4456dd
+[2025-08-23T10:41:26.5085015Z] GIT_SYNC_COMMIT_OK
+[2025-08-23T10:41:27.9673095Z] GIT_SYNC_PUSH_OK
+[2025-08-23T10:41:27.9804179Z] GIT_VERIFY_PATH_EXISTS=True len=7845 path=C:\Users\ander\My project\tools\ops\verify-remote.ps1
+[2025-08-23T10:41:27.9922765Z] GIT_VERIFY_PWSH=C:\Program Files\PowerShell\7\pwsh.exe
+[2025-08-23T10:41:28.0065469Z] GIT_VERIFY_ARGV=-NoProfile -ExecutionPolicy Bypass -File "C:\Users\ander\My project\tools\ops\verify-remote.ps1" -RepoRoot "C:\Users\ander\My project" -LiveDir "C:\Users\ander\My project\ops\live" -Owner andorfiayahoo-del -Repo htdesyeysdrdff -Branch main -RemoteName origin -OldRemoteSha 01d5eae639fefe085da29141d7f3a9fc4e4456dd
+[2025-08-23T10:41:28.0153046Z] GIT_VERIFY_RUN
+[2025-08-23T10:41:29.0777160Z] GIT_VERIFY_EXIT=64
+[2025-08-23T10:41:29.0905923Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
