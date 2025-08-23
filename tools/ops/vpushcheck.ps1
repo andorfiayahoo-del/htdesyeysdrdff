@@ -18,55 +18,58 @@ try {
   & git rev-parse --is-inside-work-tree *> $null
   if ($LASTEXITCODE -ne 0) { throw "Not a git work tree: $RepoRoot" }
 
-  # 0) Remember HEAD BEFORE push (so we can diff that..HEAD later)
+  # 0) Remember HEAD BEFORE push
   $preHead = (& git rev-parse HEAD 2>$null).Trim()
 
-  # 1) Push + strict RAW verify (blocks until RAW serves exact bytes)
+  # 1) Push + strict RAW verify
   git -C "$RepoRoot" vpush
   $head = (& git rev-parse HEAD 2>$null).Trim()
   OK "Strict verify passed for HEAD=$head"
+
+  # helper: parse NUL-separated name-status to target paths (skip deletes, take NEW path for R/C)
+  function Parse-NameStatusZ([string]$joined){
+    $tok = $joined -split "`0", [System.StringSplitOptions]::RemoveEmptyEntries
+    $out = New-Object System.Collections.Generic.List[string]
+    for ($i = 0; $i -lt $tok.Length; ) {
+      $code = $tok[$i]; $i++
+      if ([string]::IsNullOrWhiteSpace($code)) { continue }
+      if ($code -like "D*") { if ($i -lt $tok.Length) { $i++ }; continue }
+      if ($code -like "R*" -or $code -like "C*") {
+        if ($i + 1 -ge $tok.Length) { break }
+        $old = $tok[$i]; $new = $tok[$i+1]; $i += 2; $p = $new
+      } else {
+        if ($i -ge $tok.Length) { break }
+        $p = $tok[$i]; $i++
+      }
+      if ([string]::IsNullOrWhiteSpace($p)) { continue }
+      if ($p -match "^(Library/|ops/live/)") { continue }
+      [void]$out.Add($p)
+    }
+    ,(@($out | Select-Object -Unique))
+  }
+  function Join-Out($raw){ if ($raw -is [array]) { [string]::Concat($raw) } else { [string]$raw } }
+
+  # Flexible -RelPaths handling (CSV/SSV/JSON accepted via git alias)
+  if ($RelPaths -and $RelPaths.Count -eq 1) {
+    $s = $RelPaths[0].Trim()
+    if ($s.StartsWith("[")) { try { $RelPaths = @((ConvertFrom-Json $s)) } catch {} }
+    elseif ($s -match "[,;]") {
+      $RelPaths = @($s -split "\s*[,;]\s*" | ForEach-Object { $_.Trim("'""") } )
+    }
+  }
 
   # 2) Determine files to check
   $targets = @()
   if ($RelPaths -and $RelPaths.Count -gt 0) {
     $targets = $RelPaths
   } else {
-    # Helper: parse a NUL-separated --name-status stream into target paths
-    function ParseNameStatusZ([string]$joined){
-      $tok = $joined -split "`0", [System.StringSplitOptions]::RemoveEmptyEntries
-      $out = New-Object System.Collections.Generic.List[string]
-      for ($i = 0; $i -lt $tok.Length; ) {
-        $code = $tok[$i]; $i++
-        if ([string]::IsNullOrWhiteSpace($code)) { continue }
-        if ($code -like "D*") { if ($i -lt $tok.Length) { $i++ }; continue }  # skip deletes
-        if ($code -like "R*" -or $code -like "C*") {
-          if ($i + 1 -ge $tok.Length) { break }
-          $old = $tok[$i]; $new = $tok[$i+1]; $i += 2
-          $p = $new
-        } else {
-          if ($i -ge $tok.Length) { break }
-          $p = $tok[$i]; $i++
-        }
-        if ([string]::IsNullOrWhiteSpace($p)) { continue }
-        if ($p -match "^(Library/|ops/live/)") { continue }
-        [void]$out.Add($p)
-      }
-      ,(@($out | Select-Object -Unique))
-    }
+    # (a) Files from the *range* preHead..head (post-push commits, e.g., log-only)
+    $r1 = (& git diff --name-status -z -M -C "$preHead..$head" 2>$null); if ($LASTEXITCODE -ne 0) { $r1 = "" }
+    $targets += Parse-NameStatusZ (Join-Out $r1)
 
-    # Primary: diff prePush..HEAD (catches cases where an extra log-only commit lands at HEAD)
-    $joined = (& git diff --name-status -z -M -C "$preHead..$head" 2>$null)
-    if ($LASTEXITCODE -ne 0) { $joined = "" }
-    if ($joined -is [array]) { $joined = [string]::Concat($joined) }
-    $targets = ParseNameStatusZ $joined
-
-    # Fallback: if no targets (common when push didn't create a new commit), use HEAD's tree
-    if (-not $targets -or $targets.Count -eq 0) {
-      $joined2 = (& git diff-tree --no-commit-id --name-status -z -r -M -C $head 2>$null)
-      if ($LASTEXITCODE -ne 0) { $joined2 = "" }
-      if ($joined2 -is [array]) { $joined2 = [string]::Concat($joined2) }
-      $targets = ParseNameStatusZ $joined2
-    }
+    # (b) Files from the *pre-push commit itself* (so it can't be masked by a log-only HEAD)
+    $r2 = (& git diff-tree --no-commit-id --name-status -z -r -M -C $preHead 2>$null); if ($LASTEXITCODE -ne 0) { $r2 = "" }
+    $targets += Parse-NameStatusZ (Join-Out $r2)
   }
 
   $targets = @($targets | Where-Object { $_ } | Select-Object -Unique)
