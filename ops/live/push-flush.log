@@ -10,3 +10,173 @@
 [2025-08-22T12:41:27.8100399Z] GIT_HEALTH_OK remote=origin branch=main
 [2025-08-22T12:41:28.8000076Z] GIT_HEALTH_OK remote=origin branch=main
 [2025-08-22T12:56:20.2584748Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T17:42:03.4370507Z] GIT_SYNC_COMMIT_OK
+[2025-08-22T17:42:05.0016915Z] GIT_SYNC_PUSH_OK
+[2025-08-22T17:42:05.4221537Z] GIT_VERIFY_FAIL ec=1 (see VERIFY_* lines above)
+[2025-08-22T18:47:23.9227868Z] VERIFY_EX type=System.Management.Automation.MethodInvocationException msg=Exception calling "Join" with "2" argument(s): "Value cannot be null. (Parameter 'values')"
+[2025-08-22T19:04:17.7556326Z] VERIFY_BEGIN local= remote= branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T19:04:17.7689552Z] VERIFY_FAIL_REF local= remote=
+[2025-08-22T19:11:12.0860272Z] VERIFY_BEGIN local= remote= branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T19:11:12.0931757Z] VERIFY_FAIL_REF local= remote=
+[2025-08-22T19:25:31.1224629Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T19:25:31.1477190Z] VERIFY_GIT_OK tag=rev-parse-is-inside
+[2025-08-22T19:25:31.2003170Z] VERIFY_ENV_NOT_WORKTREE out=
+[2025-08-22T19:38:28.3980254Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T19:38:28.4313432Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=
+[2025-08-22T19:38:28.4493431Z] VERIFY_GIT_OK tag=rev-parse-git-dir out=
+[2025-08-22T19:38:28.4607983Z] VERIFY_GIT_OK tag=rev-parse-show-toplevel out=
+[2025-08-22T19:38:28.4713890Z] VERIFY_PROBE dotgit=C:\Users\ander\My project\.git exists=True
+[2025-08-22T19:38:28.4824825Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-22T19:38:28.4934728Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=
+[2025-08-22T19:38:28.5014176Z] VERIFY_GIT_OK tag=ls-remote out=
+[2025-08-22T19:38:28.5115900Z] VERIFY_BEGIN local= remote= branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T19:38:28.5190489Z] VERIFY_FAIL_REF local= remote=
+[2025-08-22T19:59:04.3707734Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T19:59:04.4482551Z] VERIFY_GIT_ERR tag=rev-parse-is-inside code=1 out=usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]             [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]             [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]             [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]             [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]             <command> [<args>]    These are common Git commands used in various situations:    start a working area (see also: git help tutorial)     clone      Clone a repository into a new directory     init       Create an empty Git repository or reinitialize an existing one    work on the current change (see also: git help everyday)     add        Add file contents to the index     mv         Move or rename a file, a directory, or a symlink     restore    Restore working tree files     rm         Remove files from the working tree and from the index    examine the history and state (see also: git help revisions)     bisect     Use binary search to find the commit that introduced a bug     diff       Show changes between commits, commit and working tree, etc     grep       Print lines matching a pattern     log        Show commit logs     show       Show various types of objects     status     Show the working tree status    grow, mark and tweak your common history     backfill   Download missing objects in a partial clone     branch     List, create, or delete branches     commit     Record changes to the repository     merge      Join two or more development histories together     rebase     Reapply commits on top of another base tip     reset      Reset current HEAD to the specified state     switch     Switch branches     tag        Create, list, delete or verify a tag object signed with GPG    collaborate (see also: git help workflows)     fetch      Download objects and refs from another repository     pull       Fetch from and integrate with another repository or a local branch     push       Update remote refs along with associated objects    'git help -a' and 'git help -g' list available subcommands and some  concept guides. See 'git help <command>' or 'git help <concept>'  to read about a specific subcommand or concept.  See 'git help git' for an overview of the system.
+[2025-08-22T19:59:04.4907196Z] VERIFY_GIT_ERR tag=rev-parse-git-dir code=1 out=usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]             [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]             [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]             [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]             [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]             <command> [<args>]    These are common Git commands used in various situations:    start a working area (see also: git help tutorial)     clone      Clone a repository into a new directory     init       Create an empty Git repository or reinitialize an existing one    work on the current change (see also: git help everyday)     add        Add file contents to the index     mv         Move or rename a file, a directory, or a symlink     restore    Restore working tree files     rm         Remove files from the working tree and from the index    examine the history and state (see also: git help revisions)     bisect     Use binary search to find the commit that introduced a bug     diff       Show changes between commits, commit and working tree, etc     grep       Print lines matching a pattern     log        Show commit logs     show       Show various types of objects     status     Show the working tree status    grow, mark and tweak your common history     backfill   Download missing objects in a partial clone     branch     List, create, or delete branches     commit     Record changes to the repository     merge      Join two or more development histories together     rebase     Reapply commits on top of another base tip     reset      Reset current HEAD to the specified state     switch     Switch branches     tag        Create, list, delete or verify a tag object signed with GPG    collaborate (see also: git help workflows)     fetch      Download objects and refs from another repository     pull       Fetch from and integrate with another repository or a local branch     push       Update remote refs along with associated objects    'git help -a' and 'git help -g' list available subcommands and some  concept guides. See 'git help <command>' or 'git help <concept>'  to read about a specific subcommand or concept.  See 'git help git' for an overview of the system.
+[2025-08-22T19:59:04.5526786Z] VERIFY_GIT_ERR tag=rev-parse-show-toplevel code=1 out=usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]             [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]             [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]             [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]             [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]             <command> [<args>]    These are common Git commands used in various situations:    start a working area (see also: git help tutorial)     clone      Clone a repository into a new directory     init       Create an empty Git repository or reinitialize an existing one    work on the current change (see also: git help everyday)     add        Add file contents to the index     mv         Move or rename a file, a directory, or a symlink     restore    Restore working tree files     rm         Remove files from the working tree and from the index    examine the history and state (see also: git help revisions)     bisect     Use binary search to find the commit that introduced a bug     diff       Show changes between commits, commit and working tree, etc     grep       Print lines matching a pattern     log        Show commit logs     show       Show various types of objects     status     Show the working tree status    grow, mark and tweak your common history     backfill   Download missing objects in a partial clone     branch     List, create, or delete branches     commit     Record changes to the repository     merge      Join two or more development histories together     rebase     Reapply commits on top of another base tip     reset      Reset current HEAD to the specified state     switch     Switch branches     tag        Create, list, delete or verify a tag object signed with GPG    collaborate (see also: git help workflows)     fetch      Download objects and refs from another repository     pull       Fetch from and integrate with another repository or a local branch     push       Update remote refs along with associated objects    'git help -a' and 'git help -g' list available subcommands and some  concept guides. See 'git help <command>' or 'git help <concept>'  to read about a specific subcommand or concept.  See 'git help git' for an overview of the system.
+[2025-08-22T19:59:04.5626146Z] VERIFY_PROBE dotgit=C:\Users\ander\My project\.git exists=True
+[2025-08-22T19:59:04.5721788Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-22T19:59:04.6135661Z] VERIFY_GIT_ERR tag=rev-parse-HEAD code=1 out=usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]             [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]             [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]             [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]             [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]             <command> [<args>]    These are common Git commands used in various situations:    start a working area (see also: git help tutorial)     clone      Clone a repository into a new directory     init       Create an empty Git repository or reinitialize an existing one    work on the current change (see also: git help everyday)     add        Add file contents to the index     mv         Move or rename a file, a directory, or a symlink     restore    Restore working tree files     rm         Remove files from the working tree and from the index    examine the history and state (see also: git help revisions)     bisect     Use binary search to find the commit that introduced a bug     diff       Show changes between commits, commit and working tree, etc     grep       Print lines matching a pattern     log        Show commit logs     show       Show various types of objects     status     Show the working tree status    grow, mark and tweak your common history     backfill   Download missing objects in a partial clone     branch     List, create, or delete branches     commit     Record changes to the repository     merge      Join two or more development histories together     rebase     Reapply commits on top of another base tip     reset      Reset current HEAD to the specified state     switch     Switch branches     tag        Create, list, delete or verify a tag object signed with GPG    collaborate (see also: git help workflows)     fetch      Download objects and refs from another repository     pull       Fetch from and integrate with another repository or a local branch     push       Update remote refs along with associated objects    'git help -a' and 'git help -g' list available subcommands and some  concept guides. See 'git help <command>' or 'git help <concept>'  to read about a specific subcommand or concept.  See 'git help git' for an overview of the system.
+[2025-08-22T19:59:04.6552256Z] VERIFY_GIT_ERR tag=ls-remote code=1 out=usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]             [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]             [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]             [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]             [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]             <command> [<args>]    These are common Git commands used in various situations:    start a working area (see also: git help tutorial)     clone      Clone a repository into a new directory     init       Create an empty Git repository or reinitialize an existing one    work on the current change (see also: git help everyday)     add        Add file contents to the index     mv         Move or rename a file, a directory, or a symlink     restore    Restore working tree files     rm         Remove files from the working tree and from the index    examine the history and state (see also: git help revisions)     bisect     Use binary search to find the commit that introduced a bug     diff       Show changes between commits, commit and working tree, etc     grep       Print lines matching a pattern     log        Show commit logs     show       Show various types of objects     status     Show the working tree status    grow, mark and tweak your common history     backfill   Download missing objects in a partial clone     branch     List, create, or delete branches     commit     Record changes to the repository     merge      Join two or more development histories together     rebase     Reapply commits on top of another base tip     reset      Reset current HEAD to the specified state     switch     Switch branches     tag        Create, list, delete or verify a tag object signed with GPG    collaborate (see also: git help workflows)     fetch      Download objects and refs from another repository     pull       Fetch from and integrate with another repository or a local branch     push       Update remote refs along with associated objects    'git help -a' and 'git help -g' list available subcommands and some  concept guides. See 'git help <command>' or 'git help <concept>'  to read about a specific subcommand or concept.  See 'git help git' for an overview of the system.
+[2025-08-22T19:59:04.6684066Z] VERIFY_BEGIN local=usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]
+           [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]
+           [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone      Clone a repository into a new directory
+   init       Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add        Add file contents to the index
+   mv         Move or rename a file, a directory, or a symlink
+   restore    Restore working tree files
+   rm         Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect     Use binary search to find the commit that introduced a bug
+   diff       Show changes between commits, commit and working tree, etc
+   grep       Print lines matching a pattern
+   log        Show commit logs
+   show       Show various types of objects
+   status     Show the working tree status
+
+grow, mark and tweak your common history
+   backfill   Download missing objects in a partial clone
+   branch     List, create, or delete branches
+   commit     Record changes to the repository
+   merge      Join two or more development histories together
+   rebase     Reapply commits on top of another base tip
+   reset      Reset current HEAD to the specified state
+   switch     Switch branches
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch      Download objects and refs from another repository
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system. remote=usage: branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T19:59:04.6775073Z] VERIFY_FAIL_REF local=usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]
+           [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]
+           [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone      Clone a repository into a new directory
+   init       Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add        Add file contents to the index
+   mv         Move or rename a file, a directory, or a symlink
+   restore    Restore working tree files
+   rm         Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect     Use binary search to find the commit that introduced a bug
+   diff       Show changes between commits, commit and working tree, etc
+   grep       Print lines matching a pattern
+   log        Show commit logs
+   show       Show various types of objects
+   status     Show the working tree status
+
+grow, mark and tweak your common history
+   backfill   Download missing objects in a partial clone
+   branch     List, create, or delete branches
+   commit     Record changes to the repository
+   merge      Join two or more development histories together
+   rebase     Reapply commits on top of another base tip
+   reset      Reset current HEAD to the specified state
+   switch     Switch branches
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch      Download objects and refs from another repository
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system. remote=usage:
+[2025-08-22T20:15:24.5205671Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T20:15:24.5902455Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-22T20:15:24.6053954Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-22T20:15:24.6529290Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=1eee6a7e775d63a9d57e866567049b72bc567e53
+[2025-08-22T20:15:25.1232035Z] VERIFY_GIT_OK tag=ls-remote out=1eee6a7e775d63a9d57e866567049b72bc567e53	refs/heads/main
+[2025-08-22T20:15:25.1574180Z] VERIFY_BEGIN local=1eee6a7e775d63a9d57e866567049b72bc567e53 remote=1eee6a7e775d63a9d57e866567049b72bc567e53 branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T20:15:25.2108001Z] VERIFY_GIT_OK tag=diff-tree out=
+[2025-08-22T20:15:25.2474969Z] VERIFY_CHANGED_COUNT=0
+[2025-08-22T20:15:25.2601194Z] VERIFY_NO_CHANGED_FILES local=1eee6a7e775d63a9d57e866567049b72bc567e53
+[2025-08-22T20:15:40.1549233Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T20:15:40.2245115Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-22T20:15:40.2441306Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-22T20:15:40.2917118Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=8f82162aa35fc3e85acde3298dff28e8d7363e2a
+[2025-08-22T20:15:40.7618001Z] VERIFY_GIT_OK tag=ls-remote out=8f82162aa35fc3e85acde3298dff28e8d7363e2a	refs/heads/main
+[2025-08-22T20:15:40.7767694Z] VERIFY_BEGIN local=8f82162aa35fc3e85acde3298dff28e8d7363e2a remote=8f82162aa35fc3e85acde3298dff28e8d7363e2a branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T20:15:40.8306840Z] VERIFY_GIT_OK tag=diff-tree out=
+[2025-08-22T20:15:40.8468188Z] VERIFY_CHANGED_COUNT=0
+[2025-08-22T20:15:40.8599285Z] VERIFY_NO_CHANGED_FILES local=8f82162aa35fc3e85acde3298dff28e8d7363e2a
+[2025-08-22T20:21:55.2284419Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T20:21:55.2995482Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-22T20:21:55.3151167Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-22T20:21:55.3677393Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=338f25bf90befcb19d01bcaba578a2528cf5601c
+[2025-08-22T20:21:55.8240949Z] VERIFY_GIT_OK tag=ls-remote out=338f25bf90befcb19d01bcaba578a2528cf5601c	refs/heads/main
+[2025-08-22T20:21:55.8390384Z] VERIFY_BEGIN local=338f25bf90befcb19d01bcaba578a2528cf5601c remote=338f25bf90befcb19d01bcaba578a2528cf5601c branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T20:21:55.8910478Z] VERIFY_GIT_OK tag=diff-tree out=
+[2025-08-22T20:21:55.9071256Z] VERIFY_CHANGED_COUNT=0
+[2025-08-22T20:21:55.9219296Z] VERIFY_NO_CHANGED_FILES local=338f25bf90befcb19d01bcaba578a2528cf5601c
+[2025-08-22T20:26:37.5431205Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T20:26:37.6135808Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-22T20:26:37.6304453Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-22T20:26:37.6767512Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=a7d56cdd7185e8816d4ac911ad4b29f7d22c1224
+[2025-08-22T20:26:38.1722631Z] VERIFY_GIT_OK tag=ls-remote out=a7d56cdd7185e8816d4ac911ad4b29f7d22c1224	refs/heads/main
+[2025-08-22T20:26:38.1870949Z] VERIFY_BEGIN local=a7d56cdd7185e8816d4ac911ad4b29f7d22c1224 remote=a7d56cdd7185e8816d4ac911ad4b29f7d22c1224 branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T20:26:38.2378265Z] VERIFY_GIT_OK tag=diff-tree out=README.md
+[2025-08-22T20:26:38.2544330Z] VERIFY_CHANGED_COUNT=1
+[2025-08-22T20:26:38.2725343Z] VERIFY_CHANGED_SAMPLE=README.md
+[2025-08-22T20:26:38.7078501Z] VERIFY_OK path=README.md sha=1f8701f95e9601c5413e4479c03d0281db2c2636d8af36b65edf6d57747da28f elapsed=0s
+[2025-08-22T20:26:38.7196285Z] VERIFY_STRICT_OK commit=a7d56cdd7185e8816d4ac911ad4b29f7d22c1224
+[2025-08-22T20:37:22.1750990Z] VERIFY_ENV git=C:\Program Files\Git\cmd\git.exe
+[2025-08-22T20:37:22.2446470Z] VERIFY_GIT_OK tag=rev-parse-is-inside out=true
+[2025-08-22T20:37:22.2605163Z] VERIFY_ENV_WORKTREE_OK
+[2025-08-22T20:37:22.3068851Z] VERIFY_GIT_OK tag=rev-parse-HEAD out=596839e4b79c7b1c80e818b6ae8492855384d54b
+[2025-08-22T20:37:22.7991543Z] VERIFY_GIT_OK tag=ls-remote out=596839e4b79c7b1c80e818b6ae8492855384d54b	refs/heads/main
+[2025-08-22T20:37:22.8108691Z] VERIFY_BEGIN local=596839e4b79c7b1c80e818b6ae8492855384d54b remote=596839e4b79c7b1c80e818b6ae8492855384d54b branch=main repo=andorfiayahoo-del/htdesyeysdrdff
+[2025-08-22T20:37:22.8577906Z] VERIFY_GIT_OK tag=diff-tree out=tools/ops/cdn-test.ps1
+[2025-08-22T20:37:22.8707063Z] VERIFY_CHANGED_COUNT=1
+[2025-08-22T20:37:22.8812743Z] VERIFY_CHANGED_SAMPLE=tools/ops/cdn-test.ps1
+[2025-08-22T20:37:23.2065206Z] VERIFY_OK path=tools/ops/cdn-test.ps1 sha=cf427a233f7daa1375ada28da94884a3d5018d0d67c15dee8181173515f216c1 elapsed=0s
+[2025-08-22T20:37:23.2147035Z] VERIFY_STRICT_OK commit=596839e4b79c7b1c80e818b6ae8492855384d54b

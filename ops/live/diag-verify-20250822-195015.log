@@ -1,0 +1,50 @@
+**********************
+PowerShell transcript start
+Start time: 20250822195015
+Username: DESKTOP-UQ7MKQ0\ander
+RunAs User: DESKTOP-UQ7MKQ0\ander
+Configuration Name: 
+Machine: DESKTOP-UQ7MKQ0 (Microsoft Windows NT 10.0.19045.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -WorkingDirectory ~
+Process ID: 2704
+PSVersion: 7.5.2
+PSEdition: Core
+GitCommitId: 7.5.2
+OS: Microsoft Windows 10.0.19045
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+== Hook wiring ==
+core.hooksPath      : tools/git-hooks
+post-commit present : True
+pre-push present    : True
+
+== Ops scripts ==
+git-sync.ps1        : True
+verify-remote.ps1   : True
+Remote origin/main old SHA: 8282d746145ae209e0e25a6bd6deaaebb0486c02
+
+-- push-flush.log (recent tail) --
+[2025-08-22T10:42:46.7535930Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T10:42:48.0504224Z] GIT_SYNC_COMMIT_OK
+[2025-08-22T10:42:51.2992413Z] GIT_SYNC_PUSH_OK
+[2025-08-22T11:28:27.2717741Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T12:23:30.6092420Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T12:26:44.7453276Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T12:37:37.1882876Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T12:37:38.5207017Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T12:41:24.3060152Z] GIT_HEALTH_FAIL reason=Remote unreachable
+[2025-08-22T12:41:27.8100399Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T12:41:28.8000076Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T12:56:20.2584748Z] GIT_HEALTH_OK remote=origin branch=main
+[2025-08-22T17:42:03.4370507Z] GIT_SYNC_COMMIT_OK
+[2025-08-22T17:42:05.0016915Z] GIT_SYNC_PUSH_OK
+[2025-08-22T17:42:05.4221537Z] GIT_VERIFY_FAIL ec=1 (see VERIFY_* lines above)
+[OK]  Strict HTTP verifier ran. Look for: VERIFY_BEGIN / VERIFY_WAIT_CDN / VERIFY_OK / VERIFY_STRICT_OK.
+**********************
+PowerShell transcript end
+End time: 20250822195019
+**********************
