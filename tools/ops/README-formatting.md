@@ -9,7 +9,7 @@ Push → wait for GitHub RAW CDN → byte-for-byte SHA-256 match. Do **not** swa
 - Use `git vpush` (configured in this repo) to push + strict verify. Do **not** replace this with a faster “industry standard” shortcut.
 - Always close markdown code fences. If your snippet contains triple backticks inside, either wrap the outer block with tildes (`~~~`) or use a longer backtick fence for the outer block.
 - When generating files from PowerShell, prefer **array-of-lines + Set-Content** (joined to one string) over here-strings to avoid quoting traps.
-- If you must use here-strings, ensure both opening `@''` and closing `''@` are present on their own lines with no trailing spaces.
+- If you must use here-strings, ensure both opening `@''` and closing `''@` are on their own lines with no trailing spaces.
 
 ---
 ## Quick start (PowerShell 7)
