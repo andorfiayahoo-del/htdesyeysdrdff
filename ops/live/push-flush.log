@@ -282,3 +282,11 @@ See 'git help git' for an overview of the system. remote=usage:
 [2025-08-23T10:41:35.4079908Z] VERIFY_GIT_OK tag=ls-remote out=ef417b45ea14a660ab999d719b57e1885737fcd1	refs/heads/main
 [2025-08-23T10:41:35.4229990Z] VERIFY_BEGIN local=f61710ac39da09e85c4a215a67b6c53be999ab4f remote=ef417b45ea14a660ab999d719b57e1885737fcd1 branch=main repo=andorfiayahoo-del/htdesyeysdrdff
 [2025-08-23T10:41:35.4331469Z] VERIFY_FAIL_REF local=f61710ac39da09e85c4a215a67b6c53be999ab4f remote=ef417b45ea14a660ab999d719b57e1885737fcd1
+[2025-08-23T10:52:25.2823101Z] GIT_SYNC_COMMIT_OK
+[2025-08-23T10:52:26.7179821Z] GIT_SYNC_PUSH_OK
+[2025-08-23T10:52:26.7347571Z] GIT_VERIFY_PATH_EXISTS=True len=7845 path=C:\Users\ander\My project\tools\ops\verify-remote.ps1
+[2025-08-23T10:52:26.7464451Z] GIT_VERIFY_PWSH=C:\Program Files\PowerShell\7\pwsh.exe
+[2025-08-23T10:52:26.7601343Z] GIT_VERIFY_ARGV=-NoProfile -ExecutionPolicy Bypass -File "C:\Users\ander\My project\tools\ops\verify-remote.ps1" -RepoRoot "C:\Users\ander\My project" -LiveDir "C:\Users\ander\My project\ops\live" -Owner andorfiayahoo-del -Repo htdesyeysdrdff -Branch main -RemoteName origin -OldRemoteSha ef417b45ea14a660ab999d719b57e1885737fcd1
+[2025-08-23T10:52:26.7681636Z] GIT_VERIFY_RUN
+[2025-08-23T10:52:27.8263187Z] GIT_VERIFY_EXIT=64
+[2025-08-23T10:52:27.8370956Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
