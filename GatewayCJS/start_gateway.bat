@@ -20,4 +20,4 @@ REM Start with fresh env
 pm2 start server.cjs --name unity-gateway --update-env --time
 
 REM Tail the logs
-pm2 logs unity-gateway --lines 0
+pm2 logs unity-gateway --lines 0
