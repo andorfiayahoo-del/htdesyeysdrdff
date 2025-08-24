@@ -24,20 +24,20 @@ try {
   & git rev-parse --is-inside-work-tree *> $null
   if ($LASTEXITCODE -ne 0) { throw "Not a git work tree: $RepoRoot" }
 
-  # Helpers
+  # Helpers ----------------------------------------------------------
   function Normalize-ListParam([string[]]$arr){
     if (-not $arr -or $arr.Count -ne 1) { return $arr }
     $s = $arr[0].Trim()
-    if ($s.StartsWith("[")) { try { return @((ConvertFrom-Json $s)) } catch { return ,$s } }
-    if ($s -match "[,;]")  { return @($s -split "\s*[,;]\s*" | ForEach-Object { $_.Trim("'""") }) }
-    return ,$s
+    if     ($s.StartsWith("[")) { try { return @((ConvertFrom-Json $s)) } catch { return ,$s } }
+    elseif ($s -match "[,;]")   { return @($s -split "\s*[,;]\s*" | ForEach-Object { $_.Trim("'""") }) }
+    else                        { return ,$s }
   }
   function Ensure-GlobPrefix([string]$p){ if ($p -like ':(glob)*') { $p } else { ':(glob)'+$p } }
 
+  # Run git and capture NUL-separated output safely -> token array
   function GitOutZ([string[]]$argv){
     $psi=[System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName='git'
-    $psi.WorkingDirectory = $RepoRoot
+    $psi.FileName='git'; $psi.WorkingDirectory=$RepoRoot
     $psi.UseShellExecute=$false; $psi.RedirectStandardOutput=$true; $psi.RedirectStandardError=$true; $psi.CreateNoWindow=$true
     $psi.Arguments = [string]::Join(' ', ($argv | ForEach-Object { if($_ -match '\s|"'){ '"' + ($_ -replace '"','""') + '"' } else { $_ } }))
     $p=[System.Diagnostics.Process]::Start($psi)
@@ -61,12 +61,13 @@ try {
     ,$list.ToArray()
   }
 
+  # Parse tokens from --name-status -z (skip deletes, use NEW path for R/C)
   function Parse-NameStatusTokens([string[]]$tok){
     $out = New-Object System.Collections.Generic.List[string]
     for ($i = 0; $i -lt $tok.Count; ) {
       $code = $tok[$i]; $i++
       if ([string]::IsNullOrWhiteSpace($code)) { continue }
-      if ($code -like 'D*') { if ($i -lt $tok.Count) { $i++ }; continue } # skip deletes
+      if ($code -like 'D*') { if ($i -lt $tok.Count) { $i++ }; continue } # delete => skip, consume 1 path
       if ($code -like 'R*' -or $code -like 'C*') {
         if ($i + 1 -ge $tok.Count) { break }
         $old = $tok[$i]; $new = $tok[$i+1]; $i += 2; $p = $new
@@ -81,10 +82,26 @@ try {
     ,(@($out | Select-Object -Unique))
   }
 
-  # 0) Remember HEAD before optional push
+  # Seed a RunId (RID) for this check --------------------------------
+  $runId = $env:PUSH_RUN_ID
+  if (-not $runId) {
+    $logAbs = Join-Path $RepoRoot 'ops\live\push-flush.log'
+    if (Test-Path -LiteralPath $logAbs) {
+      $tail = Get-Content -LiteralPath $logAbs -Tail 300 -ErrorAction SilentlyContinue
+      $m = $tail | Select-String -Pattern 'RID=([^\s]+)\s+RUN_BEGIN' | Select-Object -Last 1
+      if ($m) { $runId = $m.Matches[0].Groups[1].Value }
+    }
+  }
+  if (-not $runId) {
+    $runId = (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmss.fffffffZ") + "-" + ([Guid]::NewGuid().ToString("N"))
+  }
+  $env:PUSH_RUN_ID = $runId
+  if (-not $NoList) { Write-Host ("RID for this check: {0}" -f $runId) -ForegroundColor DarkCyan }
+
+  # 0) Remember HEAD before optional push ----------------------------
   $preHead = (& git rev-parse HEAD 2>$null).Trim()
 
-  # 1) Optional push + strict RAW verify
+  # 1) Optional push + strict RAW verify -----------------------------
   if (-not $NoPush) {
     git -C "$RepoRoot" vpush
     $head = (& git rev-parse HEAD 2>$null).Trim()
@@ -104,21 +121,18 @@ try {
     }
   }
 
-  # Preflight: warn if working tree dirty and we're going to compare Working↔Blob
-  if (-not $SkipWorking) {
-    $dirty = (& git status --porcelain 2>$null) -ne $null
-    # --porcelain emits nothing when clean; treat any output as dirty
-    $dirtyText = (& git status --porcelain 2>$null) | Out-String
-    if ($dirtyText.Trim().Length -gt 0) {
-      WARN "Working tree has local edits; Working↔Blob mismatches are expected. Consider -SkipWorking if you only want Blob↔RAW."
-    }
+  # Friendly heads-up if the working tree is dirty -------------------
+  & git diff --quiet;  $dirty1 = $LASTEXITCODE
+  & git diff --cached --quiet; $dirty2 = $LASTEXITCODE
+  if (($dirty1 -ne 0) -or ($dirty2 -ne 0)) {
+    WARN "Working tree has local edits; Working↔Blob mismatches are expected. Consider -SkipWorking if you only want Blob↔RAW."
   }
 
-  # Flexible inputs
+  # Flexible inputs ---------------------------------------------------
   $RelPaths = Normalize-ListParam $RelPaths
   $Glob     = Normalize-ListParam $Glob
 
-  # 2) Determine files to check
+  # 2) Determine files to check --------------------------------------
   $targets = New-Object System.Collections.Generic.List[string]
 
   if ($RelPaths -and $RelPaths.Count -gt 0) {
@@ -128,6 +142,7 @@ try {
       $tokS = GitOutZ @('diff','--name-status','-z','-M','-C',"$Since..$head")
       foreach($p in (Parse-NameStatusTokens $tokS)){ [void]$targets.Add($p) }
     } else {
+      # union: preHead..head  +  preHead commit itself
       $tok1 = GitOutZ @('diff','--name-status','-z','-M','-C',"$preHead..$head")
       foreach($p in (Parse-NameStatusTokens $tok1)){ [void]$targets.Add($p) }
       $tok2 = GitOutZ @('diff-tree','--no-commit-id','--name-status','-z','-r','-M','-C',$preHead)
@@ -137,11 +152,9 @@ try {
 
   # Add -Glob matches (tracked files, NUL safe)
   if ($Glob -and $Glob.Count -gt 0) {
-    $gl = @()
-    foreach($g in $Glob){ if($g){ $gl += ,(Ensure-GlobPrefix $g) } }
+    $gl = @(); foreach($g in $Glob){ if($g){ $gl += ,(Ensure-GlobPrefix $g) } }
     if ($gl.Count -gt 0) {
-      $args = @('ls-files','-z','--') + $gl
-      $tokG = GitOutZ $args
+      $tokG = GitOutZ (@('ls-files','-z','--') + $gl)
       foreach($p in $tokG){ if($p -and ($p -notmatch '^(Library/|ops/live/)')){ [void]$targets.Add($p) } }
     }
   }
@@ -153,18 +166,20 @@ try {
   }
   if ($targets.Count -eq 0) { WARN "No changed files to check."; exit 0 }
 
-  # 3) Check each file: blob vs working vs RAW (configurable)
+  # 3) Check each file: blob vs working vs RAW -----------------------
   $anyMismatch = $false
   foreach ($rel in $targets) {
     Write-Host ("--- check: {0} ---" -f $rel) -ForegroundColor Cyan
     $args = @(
       '-File', (Join-Path $PSScriptRoot 'check-file-integrity.ps1'),
       '-RepoRoot', $RepoRoot, '-RelPath', $rel,
-      '-Owner', $Owner, '-Repo', $Repo, '-Branch', $Branch
+      '-Owner', $Owner, '-Repo', $Repo, '-Branch', $Branch,
+      '-RunId', $runId
     )
     if ($NoNormalizeWorkingFile) { $args += '-NoNormalizeWorkingFile' }
-    if ($SkipRaw)                 { $args += '-SkipRaw' }
-    if ($SkipWorking)             { $args += '-SkipWorking' }
+    if ($SkipRaw)                { $args += '-SkipRaw' }
+    if ($SkipWorking)            { $args += '-SkipWorking' }
+
     & pwsh -NoProfile -ExecutionPolicy Bypass @args
     if ($LASTEXITCODE -eq 3) { $anyMismatch = $true }
   }
@@ -172,4 +187,6 @@ try {
   if ($anyMismatch) { ERR "One or more files mismatched."; exit 3 }
   OK "All checked files match (per selected modes)."; exit 0
 }
-finally { Pop-Location }
+finally {
+  Pop-Location
+}
