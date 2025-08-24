@@ -100,19 +100,25 @@ try{
   LogF ("VERIFY_BEGIN local={0} remote={1} branch={2} repo={3}/{4}" -f $localSha,$remoteSha,$Branch,$Owner,$Repo)
   if([string]::IsNullOrWhiteSpace($remoteSha) -or $remoteSha -ne $localSha){ LogF ("VERIFY_FAIL_REF local={0} remote={1}" -f $localSha,$remoteSha); exit 2 }
 
-  # NUL-safe name-status parse -------------------------------------------------
+  # -------- NUL-safe changed-file enumeration (robust range + fallback) -------
   $tok = @()
-  if($OldRemoteSha -and $OldRemoteSha.Length -ge 7){
-    $tok = GitOutZ @("diff","--name-status","-z","-M","-C",$OldRemoteSha,$localSha) "diff-name-status-range"
+  if ($OldRemoteSha -and $OldRemoteSha.Length -ge 7) {
+    # Primary: diff range form (honors -z reliably on Windows)
+    $tok = GitOutZ @("diff","-z","--name-status","-M","-C",("$OldRemoteSha..$localSha"),"--") "diff-name-status-range"
+    if ($tok.Count -le 1) {
+      # Fallback: diff-tree between the two commits
+      $tok = GitOutZ @("diff-tree","-z","--name-status","-r","-M","-C",$OldRemoteSha,$localSha) "diff-tree-name-status-range"
+    }
   } else {
-    $tok = GitOutZ @("diff-tree","--no-commit-id","--name-status","-z","-r","-M","-C",$localSha) "diff-tree-name-status"
+    # Single-commit (rare here, but keep it robust)
+    $tok = GitOutZ @("diff-tree","-z","--name-status","-r","-M","-C",$localSha) "diff-tree-name-status"
   }
 
   $changed = New-Object System.Collections.Generic.List[string]
   for ($i = 0; $i -lt $tok.Count; ) {
     $code = $tok[$i]; $i++
     if ([string]::IsNullOrWhiteSpace($code)) { continue }
-    if ($code -like "D*") { if ($i -lt $tok.Count) { $i++ } ; continue } # skip deletes
+    if ($code -like "D*") { if ($i -lt $tok.Count) { $i++ } ; continue } # skip deletes, consume 1 path
     if ($code -like "R*" -or $code -like "C*") {
       if ($i + 1 -ge $tok.Count) { break }
       $old=$tok[$i]; $new=$tok[$i+1]; $i+=2; $p=$new
