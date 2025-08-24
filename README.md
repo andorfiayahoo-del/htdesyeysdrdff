@@ -56,3 +56,9 @@ $strict verify ping: 2025-08-22T19:34:05.3068036+02:00
 $cdn verify test 2025-08-22T22:26:35.4036130+02:00
 
 local edit 2025-08-23T18:08:04.3813065+02:00
+
+---
+
+## Handover & Assistant Guide
+
+See **[docs/HANDOVER.md](docs/HANDOVER.md)** for the canonical operations guide, default JDI mode, and owner preferences.
