@@ -1,4 +1,4 @@
-﻿* text=auto
+* text=auto
 *.ps1  text eol=crlf
 *.psm1 text eol=crlf
 *.psd1 text eol=crlf
@@ -12,3 +12,4 @@
 .gitignore   text eol=lf
 
 ops/live/push-flush.log merge=union -diff
+docs/*.md text eol=lf
