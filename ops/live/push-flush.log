@@ -522,3 +522,10 @@ See 'git help git' for an overview of the system. remote=usage:
 [2025-08-24T13:03:42.1284921Z] GIT_VERIFY_EXIT=64
 [2025-08-24T13:03:42.1425915Z] GIT_VERIFY_FAIL ec=64 (see VERIFY_* lines above)
 [2025-08-24T13:03:42.2216222Z] RID=20250824T130336.8061106Z-ea3301b085524b588cd09c888cfecbd1 RUN_END status=FAIL postHEAD=da4398a8e5b68e548ffe7b59d08de284a7d87a48 LOGRID=20250824T130342.2369542Z-9472c59e7bb8465a851b540075a66a2f
+[2025-08-24T13:22:56.3015503Z] RID=20250824T132256.2944153Z-dcdf925f95094e9da8b9f7bde3e4424f RUN_BEGIN reason=manual preHEAD=3ce0200168a1cfc96312f77cbd8e81925b7bc8bb host=DESKTOP-UQ7MKQ0 user=ander
+[2025-08-24T13:22:57.4112756Z] RID=20250824T132256.2944153Z-dcdf925f95094e9da8b9f7bde3e4424f GIT_SYNC_COMMIT_OK
+[2025-08-24T13:23:00.4976893Z] RID=20250824T132256.2944153Z-dcdf925f95094e9da8b9f7bde3e4424f GIT_SYNC_PUSH_OK
+[2025-08-24T13:23:00.5609477Z] RID=20250824T132256.2944153Z-dcdf925f95094e9da8b9f7bde3e4424f GIT_SYNC_EX type=System.Management.Automation.CommandNotFoundException msg=The term 'if' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+[2025-08-24T13:23:00.5732378Z] RID=20250824T132256.2944153Z-dcdf925f95094e9da8b9f7bde3e4424f GIT_SYNC_EX_AT At C:\Users\ander\My project\tools\ops\git-sync.ps1:59 char:68  + … "GIT_VERIFY_PATH_EXISTS={0} len={1} path={2}" -f $exists, (if($exists …  +                                                              ~~
+[2025-08-24T13:23:00.6431722Z] RID=20250824T132256.2944153Z-dcdf925f95094e9da8b9f7bde3e4424f RUN_END status=FAIL postHEAD=0e3daa78ca19f2192ac3eb7be4a017931f7033df LOGRID=20250824T132300.6583225Z-604d826cbd1e4ddcae8037116721d82e
