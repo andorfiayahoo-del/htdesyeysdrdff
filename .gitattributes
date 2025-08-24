@@ -17,3 +17,5 @@
 *.meta    text eol=lf merge=unityyamlmerge
 ProjectSettings/*.asset text eol=lf merge=unityyamlmerge
 ops/live/push-flush.log merge=union -diff
+ops/live/push-flush.log -text merge=union -diff
+*.ps1 text eol=crlf
