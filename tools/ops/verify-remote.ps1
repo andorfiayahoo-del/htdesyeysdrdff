@@ -13,7 +13,6 @@ param(
 $ErrorActionPreference = "Stop"
 
 if ([string]::IsNullOrWhiteSpace($RunId)) {
-  # Fallback to env or generate one
   $RunId = if ($env:PUSH_RUN_ID) { $env:PUSH_RUN_ID } else {
     (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmss.fffffffZ") + "-" + ([Guid]::NewGuid().ToString("N"))
   }
@@ -29,6 +28,45 @@ function LogF([string]$m){
 function Sha256Bytes([byte[]]$bytes){ $sha=[System.Security.Cryptography.SHA256]::Create(); try{ ([System.BitConverter]::ToString($sha.ComputeHash($bytes))).Replace("-","").ToLowerInvariant() } finally{ $sha.Dispose() } }
 function GitExec([string[]]$argv){ try{ $text = & git @argv 2>&1; $code=$LASTEXITCODE; $out=($text | Out-String); @{ out=$out; err=""; code=$code } } catch { @{ out=""; err=$_.Exception.Message; code=9001 } } }
 function GitOutSafe([string[]]$argv,[string]$tag){ $r=GitExec $argv; if($r.code -ne 0){ LogF ("VERIFY_GIT_ERR tag={0} code={1} out={2}" -f $tag,$r.code, ($r.out.Trim() -replace "`r|`n"," ")) } else { LogF ("VERIFY_GIT_OK tag={0} out={1}" -f $tag, ($r.out.Trim() -replace "`r|`n"," ")) } ; $r }
+
+# NUL-safe runner for commands that use -z
+function GitOutZ([string[]]$argv,[string]$tag){
+  $psi=[System.Diagnostics.ProcessStartInfo]::new()
+  $psi.FileName='git'
+  $psi.WorkingDirectory=$RepoRoot
+  $psi.UseShellExecute=$false
+  $psi.RedirectStandardOutput=$true
+  $psi.RedirectStandardError=$true
+  $psi.CreateNoWindow=$true
+  $psi.Arguments = [string]::Join(' ', ($argv | ForEach-Object { if($_ -match '\s|"'){ '"' + ($_ -replace '"','""') + '"' } else { $_ } }))
+  $p=[System.Diagnostics.Process]::Start($psi)
+  $ms=New-Object System.IO.MemoryStream
+  $p.StandardOutput.BaseStream.CopyTo($ms); $p.WaitForExit() | Out-Null
+  if($p.ExitCode -ne 0){
+    $err=$p.StandardError.ReadToEnd()
+    LogF ("VERIFY_GIT_ERR tag={0} code={1} err={2}" -f $tag,$p.ExitCode, ($err -replace "`r|`n"," "))
+    return @()
+  }
+  $bytes=$ms.ToArray()
+  # Tokenize on NUL (UTF8)
+  $list = New-Object System.Collections.Generic.List[string]
+  $start = 0
+  for(;;){
+    $idx = [System.Array]::IndexOf($bytes, [byte]0, $start)
+    if($idx -lt 0){ $idx = $bytes.Length }
+    $len = $idx - $start
+    if($len -gt 0){
+      $s = [System.Text.Encoding]::UTF8.GetString($bytes, $start, $len)
+      [void]$list.Add($s)
+    }
+    if($idx -ge $bytes.Length){ break }
+    $start = $idx + 1
+  }
+  $tok = ,$list.ToArray()
+  LogF ("VERIFY_GIT_OK_Z tag={0} tok_count={1}" -f $tag, $tok.Count)
+  ,$tok
+}
+
 function GitBlobBytes([string]$commitSha,[string]$relPath){
   $spec = ("{0}:{1}" -f $commitSha, $relPath)
   $psi=[System.Diagnostics.ProcessStartInfo]::new(); $psi.FileName="git"
@@ -47,7 +85,6 @@ function RawUrl([string]$owner,[string]$repo,[string]$branch,[string]$relPath){
 
 Push-Location -LiteralPath $RepoRoot
 try{
-  # BEGIN marker
   LogF ("RUN_BEGIN reason=verify-remote repo={0}/{1} branch={2}" -f $Owner,$Repo,$Branch)
 
   try { $gitPath = (Get-Command git -ErrorAction Stop).Source; LogF ("VERIFY_ENV git={0}" -f $gitPath) } catch { LogF ("VERIFY_ENV_NO_GIT msg={0}" -f $_.Exception.Message); exit 1 }
@@ -64,28 +101,33 @@ try{
   if([string]::IsNullOrWhiteSpace($remoteSha) -or $remoteSha -ne $localSha){ LogF ("VERIFY_FAIL_REF local={0} remote={1}" -f $localSha,$remoteSha); exit 2 }
 
   # NUL-safe name-status parse -------------------------------------------------
-  $raw = @()
+  $tok = @()
   if($OldRemoteSha -and $OldRemoteSha.Length -ge 7){
-    $diffR = GitOutSafe @("diff","--name-status","-z","-M","-C",$OldRemoteSha,$localSha) "diff-name-status-range"; $raw = $diffR.out
+    $tok = GitOutZ @("diff","--name-status","-z","-M","-C",$OldRemoteSha,$localSha) "diff-name-status-range"
   } else {
-    $treeR = GitOutSafe @("diff-tree","--no-commit-id","--name-status","-z","-r","-M","-C",$localSha) "diff-tree-name-status"; $raw = $treeR.out
+    $tok = GitOutZ @("diff-tree","--no-commit-id","--name-status","-z","-r","-M","-C",$localSha) "diff-tree-name-status"
   }
-  $joined = if ($raw -is [array]) { [string]::Concat($raw) } else { [string]$raw }
-  $tok = $joined -split "`0", [System.StringSplitOptions]::RemoveEmptyEntries
-  $changed = @()
-  for ($i = 0; $i -lt $tok.Length; ) {
+
+  $changed = New-Object System.Collections.Generic.List[string]
+  for ($i = 0; $i -lt $tok.Count; ) {
     $code = $tok[$i]; $i++
     if ([string]::IsNullOrWhiteSpace($code)) { continue }
-    if ($code -like "D*") { if ($i -lt $tok.Length) { $i++ }; continue }
-    if ($code -like "R*" -or $code -like "C*") { if ($i + 1 -ge $tok.Length) { break }; $old=$tok[$i]; $new=$tok[$i+1]; $i+=2; $p=$new }
-    else { if ($i -ge $tok.Length) { break }; $p=$tok[$i]; $i++ }
+    if ($code -like "D*") { if ($i -lt $tok.Count) { $i++ } ; continue } # skip deletes
+    if ($code -like "R*" -or $code -like "C*") {
+      if ($i + 1 -ge $tok.Count) { break }
+      $old=$tok[$i]; $new=$tok[$i+1]; $i+=2; $p=$new
+    } else {
+      if ($i -ge $tok.Count) { break }
+      $p=$tok[$i]; $i++
+    }
     if([string]::IsNullOrWhiteSpace($p)){ continue }
     if($p -match "^(Library/|ops/live/)"){ continue }
-    $changed += ,$p
+    [void]$changed.Add($p)
   }
   $changed = @($changed | Select-Object -Unique)
   LogF ("VERIFY_CHANGED_COUNT={0}" -f $changed.Count)
   if($changed.Count -gt 0){ LogF ("VERIFY_CHANGED_SAMPLE={0}" -f (($changed | Select-Object -First 10) -join ", ")) }
+
   if($changed.Count -eq 0){ LogF ("VERIFY_NO_CHANGED_FILES local={0}" -f $localSha); LogF "RUN_END status=OK (no changed files)"; exit 0 }
 
   # Wait-for-lag per file ------------------------------------------------------
@@ -112,4 +154,3 @@ catch {
   $t = $_.Exception.GetType().FullName; LogF ("VERIFY_EX type={0} msg={1}" -f $t, $_.Exception.Message); if ($_.InvocationInfo) { LogF ("VERIFY_EX_AT {0}" -f $_.InvocationInfo.PositionMessage.Replace("`r"," ").Replace("`n"," ")) }; LogF "RUN_END status=FAIL(EX)"; exit 1
 }
 finally { Pop-Location }
-
