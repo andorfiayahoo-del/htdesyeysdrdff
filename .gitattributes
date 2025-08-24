@@ -6,3 +6,8 @@
 *.cmd  text eol=crlf
 *.sh   text eol=lf
 *.bash text eol=lf
+
+.editorconfig text eol=lf
+.gitattributes text eol=lf
+.gitignore   text eol=lf
+
