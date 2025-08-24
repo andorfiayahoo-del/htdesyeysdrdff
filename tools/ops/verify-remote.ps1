@@ -62,9 +62,9 @@ function GitOutZ([string[]]$argv,[string]$tag){
     if($idx -ge $bytes.Length){ break }
     $start = $idx + 1
   }
-  $tok = ,$list.ToArray()
+  $tok = $list.ToArray()
   LogF ("VERIFY_GIT_OK_Z tag={0} tok_count={1}" -f $tag, $tok.Count)
-  ,$tok
+$tok
 }
 
 function GitBlobBytes([string]$commitSha,[string]$relPath){
@@ -160,3 +160,4 @@ catch {
   $t = $_.Exception.GetType().FullName; LogF ("VERIFY_EX type={0} msg={1}" -f $t, $_.Exception.Message); if ($_.InvocationInfo) { LogF ("VERIFY_EX_AT {0}" -f $_.InvocationInfo.PositionMessage.Replace("`r"," ").Replace("`n"," ")) }; LogF "RUN_END status=FAIL(EX)"; exit 1
 }
 finally { Pop-Location }
+
