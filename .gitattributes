@@ -16,3 +16,4 @@
 *.anim    text eol=lf merge=unityyamlmerge
 *.meta    text eol=lf merge=unityyamlmerge
 ProjectSettings/*.asset text eol=lf merge=unityyamlmerge
+ops/live/push-flush.log merge=union -diff
