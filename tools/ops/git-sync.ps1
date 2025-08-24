@@ -56,7 +56,8 @@ try{
   # Run strict verify and CAPTURE ITS OUTPUT into this log (in addition to its own logging)
   $verifyPath = Join-Path $PSScriptRoot 'verify-remote.ps1'
   $exists = Test-Path -LiteralPath $verifyPath
-  LogF ("GIT_VERIFY_PATH_EXISTS={0} len={1} path={2}" -f $exists, (if($exists){(Get-Item $verifyPath).Length}else{0}), $verifyPath)
+  $len = if ($exists) { (Get-Item -LiteralPath $verifyPath).Length } else { 0 }
+  LogF ("GIT_VERIFY_PATH_EXISTS={0} len={1} path={2}" -f $exists, $len, $verifyPath)
 
   $pwsh = (Get-Command pwsh -ErrorAction SilentlyContinue)?.Source
   if (-not $pwsh) { $pwsh = (Get-Command powershell -ErrorAction SilentlyContinue)?.Source }
