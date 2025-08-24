@@ -123,10 +123,10 @@ try {
 
   # Friendly heads-up if the working tree is dirty -------------------
   & git diff --quiet;  $dirty1 = $LASTEXITCODE
-  & git diff --cached --quiet; $dirty2 = $LASTEXITCODE
-  if (($dirty1 -ne 0) -or ($dirty2 -ne 0)) {
-    WARN "Working tree has local edits; Working↔Blob mismatches are expected. Consider -SkipWorking if you only want Blob↔RAW."
-  }
+& git diff --cached --quiet; $dirty2 = $LASTEXITCODE
+if (-not $SkipWorking -and (($dirty1 -ne 0) -or ($dirty2 -ne 0))) {
+  WARN "Working tree has local edits; Working↔Blob mismatches are expected. Consider -SkipWorking if you only want Blob↔RAW."
+}
 
   # Flexible inputs ---------------------------------------------------
   $RelPaths = Normalize-ListParam $RelPaths
@@ -190,3 +190,4 @@ try {
 finally {
   Pop-Location
 }
+
