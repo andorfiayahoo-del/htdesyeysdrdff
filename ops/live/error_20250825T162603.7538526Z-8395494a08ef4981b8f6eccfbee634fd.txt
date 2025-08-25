@@ -1,0 +1,1 @@
+NativeCommandExitException: Program "pwsh.exe" ended with non-zero exit code: 1.
