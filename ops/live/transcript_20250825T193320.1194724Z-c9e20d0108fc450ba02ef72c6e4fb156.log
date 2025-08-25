@@ -1,14 +1,3 @@
-# Latest Error Snapshot
-
-**RID:** 
-20250825T193320.1194724Z-c9e20d0108fc450ba02ef72c6e4fb156
-  
-**Status:** ERROR  
-**Error:** 
-NativeCommandExitException: Program "pwsh.exe" ended with non-zero exit code: 1.
-  
-
-```text
 **********************
 PowerShell transcript start
 Start time: 20250825193320
@@ -37,4 +26,3 @@ PS>TerminatingError(safepush-run.ps1): "The running command stopped because the 
 PowerShell transcript end
 End time: 20250825193320
 **********************
-```
