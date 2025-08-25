@@ -37,30 +37,42 @@ public static class Win32 {
   if($unity){ [void][Win32]::SetForegroundWindow($unity.MainWindowHandle); Step "Focused Unity (pid=$($unity.Id))" }
 } catch { }
 
-# 3) Prepare success detectors
-$start = Get-Date
+# 3) Prepare success detectors (use UTC and only trust fresh Editor.log writes)
+$startUtc = [datetime]::UtcNow
 $asm1 = Join-Path $ProjectRoot 'Library\ScriptAssemblies\Assembly-CSharp.dll'
 $asm2 = Join-Path $ProjectRoot 'Library\ScriptAssemblies\Assembly-CSharp-Editor.dll'
 $elog = Join-Path $env:LOCALAPPDATA 'Unity\Editor\Editor.log'
 
-function Stamp($p){ if(Test-Path $p){ (Get-Item $p).LastWriteTimeUtc } else { [datetime]::MinValue } }
-$base1 = Stamp $asm1; $base2 = Stamp $asm2
+function StampUtc($p){ if(Test-Path $p){ (Get-Item $p).LastWriteTimeUtc } else { [datetime]::MinValue } }
+$base1 = StampUtc $asm1; $base2 = StampUtc $asm2
+$elogBaseTime = if (Test-Path $elog) { (Get-Item $elog).LastWriteTimeUtc } else { [datetime]::MinValue }
 
-Step "Waiting for compile (timestamps or Editor.log), timeout=${TimeoutSec}s"
+# give Unity a moment to notice the new file
+Start-Sleep -Milliseconds 500
+
+Step "Waiting for compile (assemblies or fresh Editor.log), timeout=${TimeoutSec}s"
 $ok = $false
-while((Get-Date) - $start -lt [TimeSpan]::FromSeconds($TimeoutSec)){
-  $n1 = Stamp $asm1; $n2 = Stamp $asm2
+$deadline = [datetime]::UtcNow.AddSeconds($TimeoutSec)
+while([datetime]::UtcNow -lt $deadline){
+  # DLL timestamp signal
+  $n1 = StampUtc $asm1; $n2 = StampUtc $asm2
   if($n1 -gt $base1 -or $n2 -gt $base2){
     $ok = $true; Step "Assemblies updated"; break
   }
+
+  # Editor.log signal (only if fresh writes happened after start)
   if(Test-Path $elog){
     try{
-      $tail = Get-Content $elog -Tail 200 -ErrorAction SilentlyContinue
-      if(($tail | Select-String -SimpleMatch -Pattern "Script compilation", "Compilation completed", "Compilation finished", "Refresh: detected")){
-        $ok = $true; Step "Editor.log indicates compile finished"; break
+      $elogInfo = Get-Item $elog
+      if ($elogInfo.LastWriteTimeUtc -gt $startUtc) {
+        $tail = Get-Content $elog -Tail 500 -ErrorAction SilentlyContinue
+        if ($tail | Select-String -SimpleMatch -Pattern "Script compilation", "Compilation completed", "Compilation finished", "Refresh: detected"){
+          $ok = $true; Step "Editor.log indicates compile finished (fresh)"; break
+        }
       }
     } catch { }
   }
+
   Start-Sleep -Milliseconds 250
 }
 
