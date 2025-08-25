@@ -20,7 +20,24 @@ Write-Host ("error_md  : " + $P.files.error_md)
 Write-Host ("transcript: " + $P.files.transcript)
 Write-Host ("error_txt : " + $P.files.error_txt)
 
+$ridMd = ''
+if(Test-Path $md){
+  try{
+    $mdText = Get-Content $md -Raw
+    $mRID = [regex]::Match($mdText, '20\d{6}T\d{6}\.\d+Z-[0-9a-f]{32}', [Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    if($mRID.Success){ $ridMd = $mRID.Value }
+  } catch { }
+}
+
 if(Test-Path $md){
   Write-Host "`n--- latest-error.md (head) ---"
   Get-Content $md -First 40
+}
+
+if($ridMd -and ($ridMd -ne $P.rid)){
+  Write-Warning ("Note: latest-error.md RID (" + $ridMd + ") differs from pointer RID (" + $P.rid + "). Showing transcript tail for pointer RID.")
+  if($P.files.transcript -and (Test-Path $P.files.transcript)){
+    Write-Host "`n--- transcript tail (" + $P.rid + ") ---"
+    Get-Content $P.files.transcript -Tail 60
+  }
 }
