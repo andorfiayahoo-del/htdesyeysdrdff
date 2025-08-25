@@ -215,9 +215,79 @@ try {
       }
 
       if ($need) {
+        # give the transcript a brief moment to flush
+        Start-Sleep -Milliseconds 50
+
         $tail = @(); try { if (Test-Path $txPath) { $tail = Get-Content $txPath -Tail 100 } } catch {}
         $errTxt = @(); try { if (Test-Path $errPathLocal) { $errTxt = Get-Content $errPathLocal } } catch {}
         $errJoined = if ($errTxt -and $errTxt.Count -gt 0) { ($errTxt -join ' ') } else { '(none)' }
+
+        # enrich from transcript tail
+        if ($errJoined -eq '(none)') {
+          try {
+            $tailScan = @()
+            if (Test-Path $txPath) { $tailScan = Get-Content $txPath -Tail 200 -ErrorAction SilentlyContinue }
+            $firstHit = $null
+            foreach($pat in @('ParserError','NativeCommandExitException','TerminatingError','At .*?:\d+ char:','The running command stopped because')) {
+              if(-not $firstHit) {
+                $hit = $tailScan | Where-Object { $_ -match $pat } | Select-Object -First 1
+                if($hit) { $firstHit = $hit }
+              }
+            }
+            if(-not $firstHit -and $tailScan) {
+              $firstHit = ($tailScan | Where-Object { $_ -match '\S' } | Select-Object -First 1)
+            }
+            if($firstHit) { $errJoined = $firstHit }
+          } catch {}
+        }
+
+        # last-chance: scan full transcript for key patterns
+        if ($errJoined -eq '(none)') {
+          try {
+            $raw = $null
+            if (Test-Path $txPath) { $raw = Get-Content $txPath -Raw -ErrorAction SilentlyContinue }
+            if ($raw) {
+              $patterns = @(
+                'NativeCommandExitException[^\r\n]*',
+                'ParserError[^\r\n]*',
+                'PS>TerminatingError[^\r\n]*',
+                'The running command stopped because[^\r\n]*',
+                'At .+?:\d+\s+char:[^\r\n]*'
+              )
+              foreach($p in $patterns){
+                if ($raw -match $p) {
+                  $errJoined = $matches[0]
+                  break
+                }
+              }
+              if ($errJoined -eq '(none)') {
+                $tailRaw = $raw.Substring([Math]::Max(0, $raw.Length - 300))
+                $line = ($tailRaw -split "`r?`n" | Where-Object { $_ -match '\S' -and $_ -notmatch '^\[step\]\s' } | Select-Object -First 1)
+                if ($line) { $errJoined = $line }
+              }
+            }
+          } catch {}
+        }
+
+        # ultimate-fallback: synthesize from EXEC and RUN_END lines
+        if ($errJoined -eq '(none)') {
+          try {
+            $rawU = $null
+            if (Test-Path $txPath) { $rawU = Get-Content $txPath -Raw -ErrorAction SilentlyContinue }
+            if ($rawU) {
+              $lines = $rawU -split "`r?`n"
+              $exec   = ($lines | Where-Object { $_ -match '^\[step\]\s+EXEC:\s+' }   | Select-Object -Last 1)
+              $runend = ($lines | Where-Object { $_ -match '^\[step\]\s+RUN_END\s+' } | Select-Object -Last 1)
+              if ($exec -or $runend) {
+                $parts = @()
+                if ($exec)   { $parts += ($exec   -replace '^\[step\]\s*','') }
+                if ($runend) { $parts += ($runend -replace '^\[step\]\s*','') }
+                $errJoined = ($parts -join ' | ')
+                if ($errJoined.Length -gt 240) { $errJoined = $errJoined.Substring(0,240) + '…' }
+              }
+            }
+          } catch {}
+        }
 
         $md = @(
           '# Latest Error Snapshot','',
