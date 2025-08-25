@@ -1,7 +1,8 @@
 # tools/ops/publish-latest-error.ps1
 param(
   [string]$RepoRoot = "C:\Users\ander\My project",
-  [string]$LiveDir  = (Join-Path $RepoRoot "ops\live")
+  [string]$LiveDir  = (Join-Path $RepoRoot "ops\live"),
+  [string]$Rid
 )
 $ErrorActionPreference = "Continue"
 trap { Write-Warning ("publisher: " + $_.Exception.Message); continue }
@@ -9,37 +10,35 @@ function Write-LF([string]$Path,[string[]]$Lines){ $enc = New-Object System.Text
 
 try {
   if(!(Test-Path $LiveDir)){ New-Item -ItemType Directory -Path $LiveDir | Out-Null }
-
   $txFiles  = Get-ChildItem -Path $LiveDir -Filter 'transcript_*.log' -ErrorAction SilentlyContinue | Sort-Object LastWriteTimeUtc -Descending
   $errFiles = Get-ChildItem -Path $LiveDir -Filter 'error_*.txt'      -ErrorAction SilentlyContinue | Sort-Object LastWriteTimeUtc -Descending
 
   $rid = 'unknown'; $txPath = ''; $errTxt = @(); $errTxtPath = ''
-  if($txFiles){
-    $tx = $txFiles[0]
-    $txPath = $tx.FullName
-    $rid = ($tx.BaseName -replace '^transcript_','')
-  }
-  if($rid -eq 'unknown' -and $errFiles){
-    $err = $errFiles[0]
-    $errTxt = Get-Content $err.FullName -ErrorAction SilentlyContinue
-    $errTxtPath = $err.FullName
-    $rid = ($err.BaseName -replace '^error_','')
+
+  if($Rid){
+    $rid = $Rid
+    $txCand = Join-Path $LiveDir ("transcript_" + $rid + ".log")
+    if(Test-Path $txCand){ $txPath = $txCand }
+    $errCand = Join-Path $LiveDir ("error_" + $rid + ".txt")
+    if(Test-Path $errCand){ $errTxt = Get-Content $errCand -ErrorAction SilentlyContinue; $errTxtPath = $errCand }
   } else {
-    $errByRid = Join-Path $LiveDir ("error_" + $rid + ".txt")
-    if(Test-Path $errByRid){
-      $errTxt = Get-Content $errByRid -ErrorAction SilentlyContinue
-      $errTxtPath = $errByRid
-    } elseif($errFiles){
-      # fall back to newest error if not found by rid
-      $err = $errFiles[0]
-      $errTxt = Get-Content $err.FullName -ErrorAction SilentlyContinue
-      $errTxtPath = $err.FullName
+    if($txFiles){
+      $tx = $txFiles[0]; $txPath = $tx.FullName; $rid = ($tx.BaseName -replace '^transcript_','')
+    }
+    if($rid -eq 'unknown' -and $errFiles){
+      $err = $errFiles[0]; $errTxt = Get-Content $err.FullName -ErrorAction SilentlyContinue; $errTxtPath = $err.FullName
+      $rid = ($err.BaseName -replace '^error_','')
+    } else {
+      $errByRid = Join-Path $LiveDir ("error_" + $rid + ".txt")
+      if(Test-Path $errByRid){
+        $errTxt = Get-Content $errByRid -ErrorAction SilentlyContinue; $errTxtPath = $errByRid
+      } elseif($errFiles){
+        $err = $errFiles[0]; $errTxt = Get-Content $err.FullName -ErrorAction SilentlyContinue; $errTxtPath = $err.FullName
+      }
     }
   }
 
-  # Extract File/Line from error text (several formats), infer file from transcript line if needed
-  $txTail = @()
-  if($txPath -and (Test-Path $txPath)){ $txTail = Get-Content $txPath -Tail 120 -ErrorAction SilentlyContinue }
+  $txTail = @(); if($txPath -and (Test-Path $txPath)){ $txTail = Get-Content $txPath -Tail 120 -ErrorAction SilentlyContinue }
   $fullErr = ($errTxt -join "`n")
   $errPath = ''; $errLine = ''
 
@@ -60,7 +59,6 @@ try {
     }
   }
 
-  # Markdown snapshot (single-line RID for easy parsing)
   $md = New-Object System.Collections.Generic.List[string]
   $md.Add("# Latest Error Snapshot")
   $md.Add("")
@@ -76,7 +74,6 @@ try {
   $out = Join-Path $LiveDir 'latest-error.md'
   Write-LF $out $md.ToArray()
 
-  # Pointer JSON
   $head = '' ; try { $head = (git -C "$RepoRoot" rev-parse HEAD).Trim() } catch { }
   $ptr = [pscustomobject]@{
     rid = $rid; status = "ERROR"; head = $head; file = $errPath; line = $errLine;
