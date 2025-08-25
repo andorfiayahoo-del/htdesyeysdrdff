@@ -1,44 +1,66 @@
-param([string]$ProjectRoot = (Get-Location).Path, [int]$TimeoutSec = 900)
-$ErrorActionPreference = "Stop"
-function Write-Utf8CrLf {
-  param([Parameter(Mandatory)][string]$Path,[Parameter(Mandatory)][string]$Text)
-  $d = Split-Path -LiteralPath $Path; if ($d) { [IO.Directory]::CreateDirectory($d) | Out-Null }
-  $Text = $Text -replace "`r`n","`n"; $Text = $Text -replace "`r","`n"; $Text = $Text -replace "`n","`r`n"
-  [IO.File]::WriteAllText($Path,$Text,[Text.UTF8Encoding]::new($false))
-}
-$stamp = Get-Date -Format "yyyyMMddHHmmss"
-$className = "ForceCompile_" + $stamp
-$csDir  = Join-Path $ProjectRoot "Assets\Ops\PatchTest"
-$csFile = Join-Path $csDir ($className + ".cs")
-$lines = @(
-  "using UnityEngine;",
-  "",
-  "namespace Ops.PatchTest {",
-  "  public sealed class " + $className + " : MonoBehaviour {",
-  "    void Awake() { Debug.Log(""[ForceCompile] injected script loaded""); }",
-  "  }",
-  "}"
+# tools/ops/patch-minforce.ps1
+param(
+  [string]$ProjectRoot = 'C:\Users\ander\My project',
+  [int]$TimeoutSec = 600
 )
-Write-Utf8CrLf -Path $csFile -Text (($lines -join "`n"))
-Write-Host "[patch] wrote $csFile" -ForegroundColor Cyan
+$ErrorActionPreference = 'Stop'
+function Step($m){ Write-Host "[Step] $m" -ForegroundColor Cyan }
+function Write-Utf8([string]$Path,[string]$Text){ $enc = New-Object System.Text.UTF8Encoding($false); [IO.File]::WriteAllText($Path,$Text,$enc) }
 
-$stepWait = Join-Path $PSScriptRoot "step-wait-unity.ps1"
-if (-not (Test-Path -LiteralPath $stepWait)) { throw "Missing step: $stepWait" }
-Write-Host "[Step] Focus Unity, then wait (RequireBusy)" -ForegroundColor Cyan
-& $stepWait -ProjectRoot $ProjectRoot -TimeoutSec $TimeoutSec -RequireBusy
+# 1) Drop a tiny C# to guarantee a recompile
+$stamp = (Get-Date).ToString("yyyyMMddHHmmss")
+$patchDir = Join-Path $ProjectRoot 'Assets\Ops\PatchTest'
+if(!(Test-Path $patchDir)){ New-Item -ItemType Directory -Path $patchDir | Out-Null }
+$csPath  = Join-Path $patchDir ("ForceCompile_" + $stamp + ".cs")
+$csBody  = @(
+  '// auto-generated to trigger Unity recompile',
+  '// timestamp: ' + $stamp,
+  'public static class __ForceCompile_' + $stamp + ' { public static int Ping => ' + $stamp + '; }'
+) -join [Environment]::NewLine
+Write-Utf8 $csPath $csBody
+Write-Host "[patch] wrote $csPath"
 
-# Produce a tiny dummy match report so the validator runs a full pass
-$liveDir = Join-Path $ProjectRoot "ops\live"
-[IO.Directory]::CreateDirectory($liveDir) | Out-Null
-$report = Join-Path $liveDir "match.json"
-$json = "{""matched"":[""" + $className + """],""mismatched"":[],""missing"":[]}"
-[IO.File]::WriteAllText($report,$json,[Text.UTF8Encoding]::new($false))
+# 2) Try to focus Unity (best-effort, non-fatal)
+try{
+  Add-Type @'
+  using System; using System.Runtime.InteropServices;
+  public static class Win32 {
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+  }
+''
+  $unity = Get-Process -Name Unity -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
+  if($unity){ [void][Win32]::SetForegroundWindow($unity.MainWindowHandle); Step "Focused Unity (pid=$($unity.Id))" }
+} catch { }
 
-$val = Join-Path $PSScriptRoot "step-validate-match.ps1"
-& $val -ProjectRoot $ProjectRoot -ReportPath $report
+# 3) Prepare success detectors
+$start   = Get-Date
+$asm1    = Join-Path $ProjectRoot 'Library\ScriptAssemblies\Assembly-CSharp.dll'
+$asm2    = Join-Path $ProjectRoot 'Library\ScriptAssemblies\Assembly-CSharp-Editor.dll'
+$elog    = Join-Path $env:LOCALAPPDATA 'Unity\Editor\Editor.log'
+function Stamp($p){ if(Test-Path $p){ (Get-Item $p).LastWriteTimeUtc } else { Get-Date 0 } }
+$base1 = Stamp $asm1; $base2 = Stamp $asm2
 
-$rel = "Assets/Ops/PatchTest/" + $className + ".cs"
-$metaRel = $rel + ".meta"
-git -C $ProjectRoot add -- $rel 2>$null
-if (Test-Path -LiteralPath (Join-Path $ProjectRoot $metaRel)) { git -C $ProjectRoot add -- $metaRel 2>$null }
-git -C $ProjectRoot vpush
+Step "Waiting for compile (timestamps or Editor.log), timeout=${TimeoutSec}s"
+$ok = $false
+while((Get-Date) - $start -lt [TimeSpan]::FromSeconds($TimeoutSec)){
+  $n1 = Stamp $asm1; $n2 = Stamp $asm2
+  if($n1 -gt $base1 -or $n2 -gt $base2){ $ok = $true; Step "Assemblies updated"; break }
+  if(Test-Path $elog){
+    try{
+      $tail = Get-Content $elog -Tail 80 -ErrorAction SilentlyContinue
+      # A few common markers across Unity versions
+      if(($tail | Select-String -SimpleMatch -Pattern "Script compilation", "Compilation completed", "Compilation finished", "Refresh: detected") ){
+        $ok = $true; Step "Editor.log indicates compile finished"; break
+      }
+    } catch { }
+  }
+  Start-Sleep -Milliseconds 250
+}
+
+if($ok){
+  Write-Host "[validate] compile detected — OK"
+  exit 0
+} else {
+  Write-Error "[validate] TIMEOUT waiting for Unity compile"
+  exit 2
+}
