@@ -19,6 +19,22 @@ if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
     if (!(Test-Path $LiveDir)) {
       New-Item -ItemType Directory -Path $LiveDir -Force -ErrorAction SilentlyContinue | Out-Null
     }
+    # enrich $errJoined from transcript tail if still (none)
+    if ($errJoined -eq '(none)') {
+      $tailScan = @()
+      try { if (Test-Path $txPath) { $tailScan = Get-Content $txPath -Tail 200 -ErrorAction SilentlyContinue } } catch {}
+      $firstHit = $null
+      foreach($pat in @('ParserError','NativeCommandExitException','TerminatingError','At .*?:\d+ char:','The running command stopped because')) {
+        if(-not $firstHit) {
+          $hit = $tailScan | Where-Object { $_ -match $pat } | Select-Object -First 1
+          if($hit) { $firstHit = $hit }
+        }
+      }
+      if(-not $firstHit -and $tailScan) {
+        $firstHit = ($tailScan | Where-Object { $_ -match '\S' } | Select-Object -First 1)
+      }
+      if($firstHit) { $errJoined = $firstHit }
+    }
     if (-not $tx -or [string]::IsNullOrWhiteSpace($tx)) {
       $tx = Join-Path $LiveDir ("transcript_" + $rid + ".log")
     }
