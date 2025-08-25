@@ -38,7 +38,7 @@ try {
       $oldNative = $PSNativeCommandUseErrorActionPreference
       $PSNativeCommandUseErrorActionPreference = $false
       try {
-        & pwsh -NoProfile -ExecutionPolicy Bypass -File $pub -RepoRoot "$RepoRoot" | Out-Null
+        & pwsh -NoProfile -ExecutionPolicy Bypass -Command "& { & '$pub' -RepoRoot '$RepoRoot' ; exit 0 }" | Out-Null
         $ec = $LASTEXITCODE
         if ($ec -eq 0) { $pubOK = $true } else { Warn ("publisher exitcode=" + $ec) }
       } catch {
