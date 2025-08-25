@@ -14,6 +14,23 @@ if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
       $rid = (Get-Date).ToString("yyyyMMddTHHmmss.fffffffZ") + "-" + ([guid]::NewGuid().ToString("N"))
     }
     # last-chance: scan entire transcript if still (none)
+    # ultimate-fallback: use EXEC/RUN_END lines if still (none)
+    if ($errJoined -eq '(none)' -and $raw) {
+      try {
+        $lines = $raw -split "`r?`n"
+        $exec   = ($lines | Where-Object { $_ -match '^\[step\]\s+EXEC:\s+' }   | Select-Object -Last 1)
+        $runend = ($lines | Where-Object { $_ -match '^\[step\]\s+RUN_END\s+' } | Select-Object -Last 1)
+
+        if ($exec -or $runend) {
+          $parts = @()
+          if ($exec)   { $parts += ($exec   -replace '^\[step\]\s*','') }
+          if ($runend) { $parts += ($runend -replace '^\[step\]\s*','') }
+          $errJoined = ($parts -join ' | ')
+          # keep the Error: line tidy
+          if ($errJoined.Length -gt 240) { $errJoined = $errJoined.Substring(0,240) + '…' }
+        }
+      } catch { }
+    }
     if ($errJoined -eq '(none)') {
       try {
         $raw = $null
