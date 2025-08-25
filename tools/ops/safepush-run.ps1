@@ -57,7 +57,7 @@ finally {
     }
     Step "Committing error artifacts"
     try {
-      git -C "$RepoRoot" add -- "ops/live/latest-error.md" "ops/live/transcript_*" "ops/live/error_*" | Out-Null
+    git -C "$RepoRoot" add -- "ops/live/latest-error.md" "ops/live/latest-pointer.json" "ops/live/transcript_*" "ops/live/error_*" | Out-Null
       $changes = git -C "$RepoRoot" status --porcelain
       if($changes){
         git -C "$RepoRoot" commit -m ("ops: ERROR RID=" + $rid + " (safepush)") | Out-Null
