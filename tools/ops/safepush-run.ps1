@@ -29,6 +29,63 @@ try {
 } finally {
   try { Stop-Transcript | Out-Null } catch { }
   if($status -ne "OK"){
+    Step "Publishing latest-error.md (RID-targeted, non-fatal)"
+    $pub      = Join-Path (Join-Path $RepoRoot 'tools\ops') 'publish-latest-error.ps1'
+    $latestMD = Join-Path $LiveDir 'latest-error.md'
+    $pointer  = Join-Path $LiveDir 'latest-pointer.json'
+    $pubOK    = $false
+
+    if(Test-Path $pub){
+      $oldNative = $PSNativeCommandUseErrorActionPreference
+      $PSNativeCommandUseErrorActionPreference = $false
+      try {
+        # Remove stale artifacts so they can't mask a failed refresh
+        foreach($p in @($latestMD,$pointer)){ try { if(Test-Path $p){ Remove-Item $p -Force } } catch {} }
+
+        # Call publisher with explicit RID and force a 0 exit in the child
+        & pwsh -NoProfile -ExecutionPolicy Bypass -Command "& { & `"$pub`" -RepoRoot `"$RepoRoot`" -Rid `"$rid`"; exit 0 }" | Out-Null
+        $pubOK = $true
+      } catch {
+        Warn ("publisher exception: " + $_.Exception.Message)
+      } finally {
+        $PSNativeCommandUseErrorActionPreference = $oldNative
+      }
+    } else {
+      Warn "publisher script not found at $pub"
+    }
+
+    # Verify pointer rid matches this run; if not, synthesize conservative latest-*
+    $needSynth = $true
+    if(Test-Path $pointer){
+      try {
+        $ptrObj = Get-Content $pointer -Raw | ConvertFrom-Json
+        if($ptrObj -and $ptrObj.rid -eq $rid){ $needSynth = $false }
+      } catch { $needSynth = $true }
+    }
+
+    if($needSynth){
+      $tail = @(); try { $tail = Get-Content $tx -Tail 80 } catch { }
+      $errTxt = @(); try { if(Test-Path $errFile){ $errTxt = Get-Content $errFile } } catch { }
+      $errJoined = if ($errTxt -and $errTxt.Count -gt 0) { ($errTxt -join ' ') } else { '(none)' }
+      $md = @(
+        '# Latest Error Snapshot','',
+        '**RID:** ' + $rid + '  ',
+        '**Status:** ERROR  ',
+        '**Error:** ' + $errJoined + '  ','',
+        '```text'
+      ) + $tail + @('```')
+      $enc = New-Object System.Text.UTF8Encoding($false)
+      [IO.File]::WriteAllText($latestMD, ($md -join "`n"), $enc)
+
+      $head = ''; try { $head = (git -C "$RepoRoot" rev-parse HEAD).Trim() } catch { }
+      $ptr = [pscustomobject]@{
+        rid   = $rid; status = "ERROR"; head = $head; file = ""; line = "";
+        files = [pscustomobject]@{ error_md = $latestMD; transcript = $tx; error_txt = $errFile }
+      }
+      $json = ($ptr | ConvertTo-Json -Depth 6)
+      [IO.File]::WriteAllText($pointer, $json + "`n", $enc)
+      Warn "publisher fallback synthesized latest-* for rid=$rid"
+    }
     Step "Publishing latest-error.md (non-fatal)"
     $pub      = Join-Path (Join-Path $RepoRoot 'tools\ops') 'publish-latest-error.ps1'
     $latestMD = Join-Path $LiveDir 'latest-error.md'
