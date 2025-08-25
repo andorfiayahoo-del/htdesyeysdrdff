@@ -31,7 +31,7 @@ if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
             if ($errJoined.Length -gt 240) { $errJoined = $errJoined.Substring(0,240) + '…' }
           }
         }
-      } catch { }
+ catch { }
     }
 
         if ($exec -or $runend) {
@@ -42,7 +42,7 @@ if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
           # keep the Error: line tidy
           if ($errJoined.Length -gt 240) { $errJoined = $errJoined.Substring(0,240) + '…' }
         }
-      } catch { }
+ catch { }
     }
     if ($errJoined -eq '(none)') {
       try {
@@ -70,7 +70,7 @@ if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
             if ($line) { $errJoined = $line }
           }
         }
-      } catch { }
+ catch { }
     }
     if (-not $LiveDir -or [string]::IsNullOrWhiteSpace($LiveDir)) {
       $LiveDir = Join-Path $RepoRoot "ops\live"
@@ -150,7 +150,7 @@ try {
       try {
         $ptrObj = Get-Content $pointer -Raw | ConvertFrom-Json
         if($ptrObj -and $ptrObj.rid -eq $rid){ $needSynth = $false }
-      } catch { $needSynth = $true }
+ catch { $needSynth = $true }
     }
 
     if($needSynth){
@@ -191,7 +191,7 @@ try {
         $hasVpush = (git -C "$RepoRoot" config --get alias.vpush) -ne $null
         if($hasVpush){ git -C "$RepoRoot" vpush | Out-Null } else { git -C "$RepoRoot" push -u origin main | Out-Null }
       } else { Warn "nothing to commit (already captured?)" }
-    } catch { Warn ("commit/push failure: " + $_.Exception.Message) }
+ catch { Warn ("commit/push failure: " + $_.Exception.Message) }
   }
   Step "RUN_END status=$status RID=$rid"
   if($status -ne "OK"){ exit 2 }
@@ -211,7 +211,7 @@ try {
         try {
           $p = Get-Content $pointerFinal -Raw | ConvertFrom-Json
           if ($p -and $p.rid -eq $rid) { $need = $false }
-        } catch { $need = $true }
+ catch { $need = $true }
       }
 
       if ($need) {
@@ -238,7 +238,7 @@ try {
               $firstHit = ($tailScan | Where-Object { $_ -match '\S' } | Select-Object -First 1)
             }
             if($firstHit) { $errJoined = $firstHit }
-          } catch {}
+ catch {}
         }
 
         # last-chance: scan full transcript for key patterns
@@ -266,7 +266,7 @@ try {
                 if ($line) { $errJoined = $line }
               }
             }
-          } catch {}
+ catch {}
         }
 
         # ultimate-fallback: synthesize from EXEC and RUN_END lines
@@ -286,7 +286,7 @@ try {
                 if ($errJoined.Length -gt 240) { $errJoined = $errJoined.Substring(0,240) + '…' }
               }
             }
-          } catch {}
+ catch {}
         }
 
         $md = @(
@@ -315,7 +315,7 @@ try {
       } else {
         Step "Safety publish: pointer already up to date for rid=$rid"
       }
-    } catch {
+ catch {
       Warn ("Safety publish failed: " + $_.Exception.Message)
     }
 Step "Finalize: update latest-pointer head to current HEAD"
@@ -342,6 +342,6 @@ try {
   } else {
     Step "Finalize: no pointer file found — skipping"
   }
-} catch {
+ catch {
   Warn ("Finalize head update failed: " + $_.Exception.Message)
 }
