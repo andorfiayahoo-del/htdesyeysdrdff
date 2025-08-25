@@ -13,6 +13,35 @@ if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
     if (-not $rid -or [string]::IsNullOrWhiteSpace($rid)) {
       $rid = (Get-Date).ToString("yyyyMMddTHHmmss.fffffffZ") + "-" + ([guid]::NewGuid().ToString("N"))
     }
+    # last-chance: scan entire transcript if still (none)
+    if ($errJoined -eq '(none)') {
+      try {
+        $raw = $null
+        if (Test-Path $txPath) { $raw = Get-Content $txPath -Raw -ErrorAction SilentlyContinue }
+        if ($raw) {
+          # Grab a meaningful single line if present
+          $patterns = @(
+            'NativeCommandExitException[^\r\n]*',
+            'ParserError[^\r\n]*',
+            'PS>TerminatingError[^\r\n]*',
+            'The running command stopped because[^\r\n]*',
+            'At .+?:\d+\s+char:[^\r\n]*'
+          )
+          foreach($p in $patterns){
+            if ($raw -match $p) {
+              $errJoined = $matches[0]
+              break
+            }
+          }
+          if ($errJoined -eq '(none)') {
+            # fallback: first non-empty, non-[step] line in the last 300 chars
+            $tailRaw = $raw.Substring([Math]::Max(0, $raw.Length - 300))
+            $line = ($tailRaw -split "`r?`n" | Where-Object { $_ -match '\S' -and $_ -notmatch '^\[step\]\s' } | Select-Object -First 1)
+            if ($line) { $errJoined = $line }
+          }
+        }
+      } catch { }
+    }
     if (-not $LiveDir -or [string]::IsNullOrWhiteSpace($LiveDir)) {
       $LiveDir = Join-Path $RepoRoot "ops\live"
     }
