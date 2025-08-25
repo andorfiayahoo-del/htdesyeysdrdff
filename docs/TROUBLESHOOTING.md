@@ -7,7 +7,8 @@
 - Unity must be open in an interactive desktop session. Focus detection uses user32; headless/SSH won't work.
 
 ### Validator not green
-- `match.json` with `mismatched>0` or `missing>0`: revert the canary commit, run `patch-minforce.ps1` again.
+- `match.json` uses arrays for `mismatched`/`missing`. Treat non-empty arrays as failures.
+- If non-empty, revert the canary commit and re-run `patch-minforce.ps1`.
 
 ### On wrong branch
 - Checkout `main` before running ops: `git checkout main && git pull --rebase`.

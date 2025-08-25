@@ -9,5 +9,5 @@
    ```
 3. Confirm:
    - compile focus → busy → idle observed
-   - `match.json` shows `matched=1 mismatched=0 missing=0`
+   - `match.json` shows arrays `mismatched=[]` and `missing=[]` (both empty)
    - `push-flush.log` ends with `VERIFY_STRICT_OK`

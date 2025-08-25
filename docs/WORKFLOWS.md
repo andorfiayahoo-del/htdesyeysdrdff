@@ -3,7 +3,7 @@
 ## Canary Patch + Verify (Primary)
 1) **Create tiny test patch**: `patch-minforce.ps1` adds `ForceCompile_*.cs`
 2) **Wait for Unity compile**: focus/idle detection via user32; writes sentinel
-3) **Validate match**: `step-validate-match.ps1` → `ops/live/match.json`
+3) **Validate match**: `step-validate-match.ps1` → `ops/live/match.json` (arrays for mismatches/missing)
 4) **Verify & push**: `git vpush` → `ops/live/push-flush.log` (STRICT_OK & health)
 
 ### Expected Markers

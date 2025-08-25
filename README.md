@@ -37,7 +37,7 @@ You should see:
 ## Logs & Success Markers
 - `ops/live/push-flush.log` – verify + health (expect `VERIFY_STRICT_OK`)
 - `ops/live/unity-compile.json` – sentinel
-- `ops/live/match.json` – validator report (expect `mismatched=0`, `missing=0`)
+- `ops/live/match.json` – validator report (arrays for `mismatched`/`missing`; expect both **empty**) 
 
 ## Failure Recovery
 - Revert the tiny test file commit (e.g., `Assets/Ops/PatchTest/ForceCompile_*.cs`) or `git revert <sha>`.
