@@ -22,3 +22,11 @@ WSManStackVersion: 3.0
 [step] Transcript → C:\Users\ander\My project\ops\live\transcript_20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706.log
 [step] Safety publish: ensure latest-* exist for this RID
 [step] Safety publish completed for rid=20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706
+[step] Finalize: update latest-pointer head to current HEAD
+[step] Pointer head updated to post-run HEAD
+PS>$global:?
+True
+**********************
+PowerShell transcript end
+End time: 20250825195446
+**********************
