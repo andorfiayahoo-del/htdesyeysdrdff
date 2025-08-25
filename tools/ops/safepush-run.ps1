@@ -86,47 +86,6 @@ try {
       [IO.File]::WriteAllText($pointer, $json + "`n", $enc)
       Warn "publisher fallback synthesized latest-* for rid=$rid"
     }
-    Step "Publishing latest-error.md (non-fatal)"
-    $pub      = Join-Path (Join-Path $RepoRoot 'tools\ops') 'publish-latest-error.ps1'
-    $latestMD = Join-Path $LiveDir 'latest-error.md'
-    $pointer  = Join-Path $LiveDir 'latest-pointer.json'
-    $pubOK = $false
-    if(Test-Path $pub){
-      $oldNative = $PSNativeCommandUseErrorActionPreference
-      $PSNativeCommandUseErrorActionPreference = $false
-      try {
-        & pwsh -NoProfile -ExecutionPolicy Bypass -Command "& { & `"$pub`" -RepoRoot `"$RepoRoot`" -Rid `"$rid`"; exit 0 }" | Out-Null
-        $pubOK = $true  # publisher forced OK (RID-targeted, exit 0)
-        $ec = $LASTEXITCODE
-        # publisher exitcode suppressed by wrapper patch (RID-targeted call exits 0)
-      } catch {
-        Warn ("publisher exception: " + $_.Exception.Message)
-      } finally {
-        $PSNativeCommandUseErrorActionPreference = $oldNative
-      }
-    }
-    # Fallbacks if publisher didn't create artifacts
-    if(-not (Test-Path $latestMD)){
-      $tail = @(); try { $tail = Get-Content $tx -Tail 80 } catch { }
-      $errTxt = @(); try { if(Test-Path $errFile){ $errTxt = Get-Content $errFile } } catch { }
-      $errJoined = if ($errTxt -and $errTxt.Count -gt 0) { ($errTxt -join ' ') } else { '(none)' }
-      $md = @('# Latest Error Snapshot','','**RID:** ' + $rid + '  ','**Status:** ERROR  ','**Error:** ' + $errJoined + '  ','','```text') + $tail + @('```')
-      Write-LF $latestMD $md
-    }
-    if(-not (Test-Path $pointer)){
-      $head = '' ; try { $head = (git -C "$RepoRoot" rev-parse HEAD).Trim() } catch { }
-      $efile = '' ; $eline = '' ;
-      try {
-        $rawErr = if(Test-Path $errFile){ Get-Content $errFile -Raw } else { "" }
-        $mm = [regex]::Match($rawErr, 'ParserError:\s+(.+?):(\d+)', [Text.RegularExpressions.RegexOptions]::IgnoreCase)
-        if($mm.Success){ $efile = $mm.Groups[1].Value; $eline = $mm.Groups[2].Value }
-      } catch { }
-      $txPath = $tx
-      $errTxtPath = if(Test-Path $errFile){ $errFile } else { "" }
-      $ptr = [pscustomobject]@{ rid = $rid; status = "ERROR"; head = $head; file = $efile; line = $eline; files = [pscustomobject]@{ error_md = $latestMD; transcript = $txPath; error_txt = $errTxtPath } }
-      $json = ($ptr | ConvertTo-Json -Depth 6)
-      Write-LF $pointer @($json)
-    }
     Step "Committing error artifacts"
     try {
       $toAdd = New-Object System.Collections.Generic.List[string]
