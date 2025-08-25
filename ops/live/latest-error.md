@@ -1,7 +1,7 @@
 # Latest Error Snapshot
 
 **RID:** 
-20250825T195815.3109906Z-0bc956512ab1465bb231565fd4d0adc9
+20250825T205330.9186810Z-a6ddf1cb3ffd45138629da456aefe639
   
 **Status:** ERROR  
 **Error:** 
@@ -11,13 +11,13 @@
 ```text
 **********************
 PowerShell transcript start
-Start time: 20250825195815
+Start time: 20250825205330
 Username: DESKTOP-UQ7MKQ0\ander
 RunAs User: DESKTOP-UQ7MKQ0\ander
 Configuration Name: 
 Machine: DESKTOP-UQ7MKQ0 (Microsoft Windows NT 10.0.19045.0)
 Host Application: C:\Program Files\PowerShell\7\pwsh.dll -NoProfile -File C:\Users\ander\My project\tools\ops\safepush-run.ps1 -RepoRoot C:\Users\ander\My project -Cmd pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\tests\bad-parse.ps1"
-Process ID: 23624
+Process ID: 32932
 PSVersion: 7.5.2
 PSEdition: Core
 GitCommitId: 7.5.2
@@ -28,8 +28,8 @@ PSRemotingProtocolVersion: 2.3
 SerializationVersion: 1.1.0.1
 WSManStackVersion: 3.0
 **********************
-[step] RUN_BEGIN (RID=20250825T195815.3109906Z-0bc956512ab1465bb231565fd4d0adc9)
+[step] RUN_BEGIN (RID=20250825T205330.9186810Z-a6ddf1cb3ffd45138629da456aefe639)
 [step] EXEC: pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\tests\bad-parse.ps1"
-[step] Transcript → C:\Users\ander\My project\ops\live\transcript_20250825T195815.3109906Z-0bc956512ab1465bb231565fd4d0adc9.log
+[step] Transcript → C:\Users\ander\My project\ops\live\transcript_20250825T205330.9186810Z-a6ddf1cb3ffd45138629da456aefe639.log
 [step] Safety publish: ensure latest-* exist for this RID
 ```
