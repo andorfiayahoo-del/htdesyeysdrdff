@@ -15,13 +15,7 @@ $patchDir  = Join-Path $ProjectRoot "Assets\Ops\PatchTest"
 $liveDir   = Join-Path $ProjectRoot "ops\live"
 foreach($d in @($editorDir,$patchDir,$liveDir)){ if(!(Test-Path $d)){ New-Item -ItemType Directory -Path $d | Out-Null } }
 
-# Ensure sentinel present (idempotent; content managed outside)
-# (The file itself is authored/updated by the outer one-shot.)
-if(!(Test-Path (Join-Path $editorDir "OpsCompileSignal.cs"))){
-  Write-Warning "OpsCompileSignal.cs not found; Unity will compile it now."
-}
-
-# 1) Drop tiny C# to force recompile
+# 1) Force recompile
 $stamp  = (Get-Date).ToString("yyyyMMddHHmmss")
 $csPath = Join-Path $patchDir ("ForceCompile_" + $stamp + ".cs")
 $csBody = @"
@@ -32,7 +26,7 @@ $csBody = @"
 Write-Utf8 $csPath $csBody
 Write-Host "[patch] wrote $csPath"
 
-# 2) Prepare handshake files
+# 2) Handshake files
 $token        = (Get-Date).ToString("yyyyMMddTHHmmss.fffffffZ") + "-" + ([guid]::NewGuid().ToString("N"))
 $triggerPath  = Join-Path $liveDir "compile-trigger.txt"
 $ackPath      = Join-Path $liveDir ("compile-ack_" + $token + ".txt")
@@ -53,20 +47,19 @@ public static class Win32 {
   if($unity){ [void][Win32]::SetForegroundWindow($unity.MainWindowHandle); Step "Focused Unity (pid=$($unity.Id))" }
 }catch{}
 
-# 4) Baselines and paths
+# 4) Baselines
 $asm1 = Join-Path $ProjectRoot "Library\ScriptAssemblies\Assembly-CSharp.dll"
 $asm2 = Join-Path $ProjectRoot "Library\ScriptAssemblies\Assembly-CSharp-Editor.dll"
 $elog = Join-Path $env:LOCALAPPDATA "Unity\Editor\Editor.log"
 $base1 = StampUtc $asm1; $base2 = StampUtc $asm2
-$elogBase = StampUtc $elog
 
 Start-Sleep -Milliseconds 500
 
-# 5) Wait for: ack (fresh) AND (DLL updated OR fresh log shows compile finished)
+# 5) Wait for: ack (fresh) AND (DLL updated OR fresh log message)
 $deadline = [datetime]::UtcNow.AddSeconds($TimeoutSec)
 $ackOk = $false; $dllOk = $false; $logOk = $false
-
 Step "Waiting for Unity ack (token) AND compile evidence (DLL or Editor.log), timeout=${TimeoutSec}s"
+
 while([datetime]::UtcNow -lt $deadline){
   if(-not $ackOk -and (Test-Path $ackPath)){
     $ackTime = (Get-Item $ackPath).LastWriteTimeUtc
@@ -91,9 +84,31 @@ while([datetime]::UtcNow -lt $deadline){
   }
 
   if($ackOk -and ($dllOk -or $logOk)){
-    Write-Host "[validate] compile detected — OK"
-    exit 0
+    Step "Initial success gates met → entering short stabilization"
+    # --- Stabilization: require 1.5s with no further DLL/log writes ---
+    $stableStart = [datetime]::UtcNow
+    $prevAsm1 = StampUtc $asm1; $prevAsm2 = StampUtc $asm2
+    $prevLog  = if(Test-Path $elog){ (Get-Item $elog).LastWriteTimeUtc } else { [datetime]::MinValue }
+    while(([datetime]::UtcNow -lt $deadline)){
+      Start-Sleep -Milliseconds 200
+      $curAsm1 = StampUtc $asm1; $curAsm2 = StampUtc $asm2
+      $curLog  = if(Test-Path $elog){ (Get-Item $elog).LastWriteTimeUtc } else { [datetime]::MinValue }
+      if($curAsm1 -eq $prevAsm1 -and $curAsm2 -eq $prevAsm2 -and $curLog -eq $prevLog){
+        if(([datetime]::UtcNow - $stableStart).TotalMilliseconds -ge 1500){
+          Step "Stable for 1.5s — OK"
+          Write-Host "[validate] compile detected — OK"
+          try{
+            $cleanup = Join-Path (Join-Path $ProjectRoot 'tools\ops') 'cleanup-live.ps1'
+            if(Test-Path $cleanup){ & pwsh -NoProfile -ExecutionPolicy Bypass -File $cleanup -RepoRoot "$ProjectRoot" -RetentionDays 7 | Out-Null }
+          }catch{}
+          exit 0
+        }
+      } else {
+        $prevAsm1 = $curAsm1; $prevAsm2 = $curAsm2; $prevLog = $curLog; $stableStart = [datetime]::UtcNow
+      }
+    }
   }
+
   Start-Sleep -Milliseconds 250
 }
 
