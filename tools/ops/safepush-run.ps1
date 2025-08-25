@@ -30,13 +30,22 @@ try {
   try { Stop-Transcript | Out-Null } catch { }
   if($status -ne "OK"){
     Step "Publishing latest-error.md (non-fatal)"
-    $pub = Join-Path (Join-Path $RepoRoot 'tools\ops') 'publish-latest-error.ps1'
+    $pub      = Join-Path (Join-Path $RepoRoot 'tools\ops') 'publish-latest-error.ps1'
     $latestMD = Join-Path $LiveDir 'latest-error.md'
     $pointer  = Join-Path $LiveDir 'latest-pointer.json'
     $pubOK = $false
     if(Test-Path $pub){
-      try { & pwsh -NoProfile -ExecutionPolicy Bypass -File $pub -RepoRoot "$RepoRoot" | Out-Null; if ($LASTEXITCODE -eq 0) { $pubOK = $true } }
-      catch { Warn ("publisher error: " + $_.Exception.Message) }
+      $oldNative = $PSNativeCommandUseErrorActionPreference
+      $PSNativeCommandUseErrorActionPreference = $false
+      try {
+        & pwsh -NoProfile -ExecutionPolicy Bypass -File $pub -RepoRoot "$RepoRoot" | Out-Null
+        $ec = $LASTEXITCODE
+        if ($ec -eq 0) { $pubOK = $true } else { Warn ("publisher exitcode=" + $ec) }
+      } catch {
+        Warn ("publisher exception: " + $_.Exception.Message)
+      } finally {
+        $PSNativeCommandUseErrorActionPreference = $oldNative
+      }
     }
     # Fallbacks if publisher didn't create artifacts
     if(-not (Test-Path $latestMD)){
