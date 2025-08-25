@@ -104,3 +104,26 @@ git -C "$RepoRoot" vpush
 - Revert last commit (safe): `git revert <sha>`
 - Hard reset local (dangerous): `git reset --hard <sha>`
 - If verification fails, check ops/live/push-flush.log for VERIFY_* lines.
+
+---
+
+## Unity: Wait for compile (sentinel)
+
+- A tiny Editor script (`Assets/Editor/Ops/CompileSentinel.cs`) writes `ops/live/unity-compile.json` on compile start/finish.
+- Use `tools/ops/unity-wait-compile.ps1` to block until the Editor is done compiling.
+
+### Usage
+
+```powershell
+# Wait until the open Unity Editor has finished compiling
+pwsh tools/ops/unity-wait-compile.ps1 -ProjectRoot "C:\Users\ander\My project" -TimeoutSec 300
+
+# (Optional) If Unity is not open, ping via -executeMethod to write the sentinel once:
+pwsh tools/ops/unity-wait-compile.ps1 -ProjectRoot "C:\Users\ander\My project" -TimeoutSec 120 -UnityExe "C:\Program Files\Unity\Hub\Editor\<ver>\Editor\Unity.exe" -EmitPing
+```
+
+### Notes
+
+- Sentinel path: `ops/live/unity-compile.json` (kept outside `Assets`).
+- Success = both `isCompiling=false` and `isUpdating=false`.
+- Script is idempotent; safe to call between patch steps to serialize work.
