@@ -20,3 +20,11 @@ WSManStackVersion: 3.0
 [step] RUN_BEGIN (RID=20250825T195112.2131116Z-b5910461505646198437e3a16a591cd8)
 [step] EXEC: pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\tests\bad-parse.ps1"
 [step] Transcript → C:\Users\ander\My project\ops\live\transcript_20250825T195112.2131116Z-b5910461505646198437e3a16a591cd8.log
+[step] Finalize: update latest-pointer head to current HEAD
+[step] Pointer head updated to post-run HEAD
+PS>$global:?
+True
+**********************
+PowerShell transcript end
+End time: 20250825195122
+**********************
