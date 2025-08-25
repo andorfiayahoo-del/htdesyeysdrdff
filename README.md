@@ -1,64 +1,51 @@
-<!-- HANDOVER-BANNER v1 -->
-> 🚨 **MANDATORY FOR ALL ASSISTANTS:** Read **ALL** handover materials **before doing anything**.
-> Start here → **[handover/Handover-Instructions.md](handover/Handover-Instructions.md)**
-> Local folder C:\Users\ander\My project and this GitHub repo **must ALWAYS be in sync**.
-> Loop (event-driven, **no timers**): **patch → apply → push**.
-<!-- /HANDOVER-BANNER -->
-# Project Handover
+# Project Handover & Ops Guide
 
-**MUST read ALL the handover information** before doing anything else.
+> **Status:** Green flow using local canary patch + verify. No external router in this repo.
 
-This repository and the local folder **must always be in sync**:
-- Authoritative local folder: C:\Users\ander\My project
-- Public GitHub (read-only for assistants): https://github.com/andorfiayahoo-del/htdesyeysdrdff
+## Source of Truth
+- **Default branch:** `main`
+- **Live Unity project root:** `C:\Users\ander\My project`
+- **Rollbacks:** use commit SHAs from `ops/live/push-flush.log` (tags not used).
 
-**Loop (event-driven, no timer):** patch → apply → push
-1) Assistant proposes a patch (saved as Downloads\patch_XXXXX.patch).
-2) Router attempts apply.
-3) On success or attempted apply, logs are pushed immediately to this repo.
-4) Assistant reads new logs and iterates.
+## Key Directories
+- `tools/ops/` – ops scripts (`patch-minforce.ps1`, `unity-wait-compile.ps1`, `step-validate-match.ps1`, etc.)
+- `Assets/Editor/Ops/CompileSentinel.cs` – writes compile sentinel
+- `Assets/Ops/PatchTest/` – tiny force-compile test classes
+- `ops/live/` – logs & reports (`push-flush.log`, `match.json`, `unity-compile.json`)
 
-<!-- sync-stamp: 2025-08-22T08:02:11.505Z -->
+## One-Line Smoke Test
+```powershell
+$RepoRoot = "C:\Users\ander\My project"
+pwsh -NoProfile -File "$RepoRoot\tools\ops\patch-minforce.ps1" -ProjectRoot "$RepoRoot" -TimeoutSec 900
+Get-Content "$RepoRoot\ops\live\push-flush.log" -Tail 80
+```
+You should see:
+- `[unity-focus] Unity focused — waiting for compile completion...`
+- A compile wait that ends when Unity is idle
+- `[validate-match] matched=1 mismatched=0 missing=0`
+- `VERIFY_STRICT_OK` and `GIT_VERIFY_OK`
 
-<!-- REPAIR-RECONNECT:BEGIN -->
-### Quick Repair / Reconnect (no timers)
-If Git disconnects (you’ll see ops/live/GIT-DISCONNECTED.txt or GIT_HEALTH_FAIL in ops/live/push-flush.log):
+## Normal Ops (Docs/Code changes)
+1. Edit files (docs or code).
+2. `git add` and `git commit` your changes.
+3. Run the canary patch to sync Unity state and validate:
+   ```powershell
+   pwsh -NoProfile -File tools\ops\patch-minforce.ps1 -ProjectRoot "C:\Users\ander\My project" -TimeoutSec 900
+   ```
+4. Push with verify (**preferred**): `git vpush` (alias runs remote verify and pushes logs).
 
-1) Open PowerShell in C:\Users\ander\My project
-2) Run:  
-   pwsh -NoProfile -ExecutionPolicy Bypass -File tools\ops\repair-reconnect.ps1
-3) Re-run the patch → apply → push loop.
+## Logs & Success Markers
+- `ops/live/push-flush.log` – verify + health (expect `VERIFY_STRICT_OK`)
+- `ops/live/unity-compile.json` – sentinel
+- `ops/live/match.json` – validator report (expect `mismatched=0`, `missing=0`)
 
-This repo uses event-driven guards:
-- **pre-push** runs a Git **health check** (blocks bad pushes)
-- **post-commit** auto-pushes to origin main
-<!-- REPAIR-RECONNECT:END -->
+## Failure Recovery
+- Revert the tiny test file commit (e.g., `Assets/Ops/PatchTest/ForceCompile_*.cs`) or `git revert <sha>`.
+- Re-run `patch-minforce.ps1`.
 
+## Not In Scope (Here)
+- Unity **voice bridge** (Whisper/Python/etc.) is **not part of this repo**.
 
-$hook test: 2025-08-22T12:46:51.3808961+02:00
-
-<!--  -->
-### Access Flow (no agent tools required)
-Assistants must access the repo via public GitHub URLs (blob/raw), like any website:
-- Repo: https://github.com/andorfiayahoo-del/htdesyeysdrdff
-- RAW base: https://raw.githubusercontent.com/andorfiayahoo-del/htdesyeysdrdff/main
-
-Do **not** depend on ChatGPT agent/browser integrations. If browsing tools are unavailable,
-state clearly: “I'll use the public raw/blob URLs instead.”
-_sync-stamp: 
-<!--  -->
-
-
-
-
-
-$strict verify ping: 2025-08-22T19:34:05.3068036+02:00
-$cdn verify test 2025-08-22T22:26:35.4036130+02:00
-
-local edit 2025-08-23T18:08:04.3813065+02:00
-
----
-
-## Handover & Assistant Guide
-
-See **[docs/HANDOVER.md](docs/HANDOVER.md)** for the canonical operations guide, default JDI mode, and owner preferences.
+## Notes
+- EOL normalization is pinned: `.meta` & scripts CRLF; docs LF.
+- Avoid here-strings in scripts; prefer explicit line arrays/writers.
