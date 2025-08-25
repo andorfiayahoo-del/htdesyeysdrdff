@@ -20,13 +20,11 @@ if (-not $ReportPath) {
 $raw = Get-Content -LiteralPath $ReportPath -Raw
 try { $j = $raw | ConvertFrom-Json } catch { $j = $null }
 if ($j -ne $null) {
-  $matched = @($j.matched).Count
+  $matched    = @($j.matched).Count
   $mismatched = @($j.mismatched).Count
-  $missing = @($j.missing).Count
+  $missing    = @($j.missing).Count
   Write-Host "[validate-match] matched=$matched mismatched=$mismatched missing=$missing" -ForegroundColor Cyan
-  if (-not $Soft -and (($mismatched -gt 0) -or ($missing -gt 0))) {
-    throw "Match validation failed."
-  }
+  if (-not $Soft -and (($mismatched -gt 0) -or ($missing -gt 0))) { throw "Match validation failed." }
 } else {
   Write-Host "[validate-match] Non-JSON report, showing last lines:" -ForegroundColor Cyan
   $raw -split "`n" | Select-Object -Last 40 | ForEach-Object { Write-Host $_ }
