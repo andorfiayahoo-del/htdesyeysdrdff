@@ -1,4 +1,4 @@
-# bad-parse.ps1 - deliberately invalid PowerShell
+# bad-parse.ps1
 param()
 $x = @("ok", )
-Write-Host "You should never see this line."
+Write-Host "should not print"
