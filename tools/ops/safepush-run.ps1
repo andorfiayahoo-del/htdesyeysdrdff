@@ -9,6 +9,19 @@ function Step($m){ Write-Host "[step] $m" -ForegroundColor Cyan }
 function Warn($m){ Write-Warning $m }
 function Write-LF([string]$Path,[string[]]$Lines){ $enc = New-Object System.Text.UTF8Encoding($false); [IO.File]::WriteAllText($Path, ($Lines -join "`n"), $enc) }
 if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
+    # Guard: ensure RID/LiveDir/tx before transcript
+    if (-not $rid -or [string]::IsNullOrWhiteSpace($rid)) {
+      $rid = (Get-Date).ToString("yyyyMMddTHHmmss.fffffffZ") + "-" + ([guid]::NewGuid().ToString("N"))
+    }
+    if (-not $LiveDir -or [string]::IsNullOrWhiteSpace($LiveDir)) {
+      $LiveDir = Join-Path $RepoRoot "ops\live"
+    }
+    if (!(Test-Path $LiveDir)) {
+      New-Item -ItemType Directory -Path $LiveDir -Force -ErrorAction SilentlyContinue | Out-Null
+    }
+    if (-not $tx -or [string]::IsNullOrWhiteSpace($tx)) {
+      $tx = Join-Path $LiveDir ("transcript_" + $rid + ".log")
+    }
 Step "Transcript → $tx"
 Start-Transcript -Path $tx | Out-Null
 $status = "OK"
@@ -21,7 +34,7 @@ try {
   $msg = ($_ | Out-String).Trim()
   Write-LF $errFile @($msg)
   Write-Error $msg
-} finally {
+    Step "Transcript → $tx"
   try { Stop-Transcript | Out-Null } catch { }
   if($status -ne "OK"){
     Step "Publishing latest-error.md (RID-targeted, non-fatal)"
