@@ -22,13 +22,20 @@ if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
     if (-not $tx -or [string]::IsNullOrWhiteSpace($tx)) {
       $tx = Join-Path $LiveDir ("transcript_" + $rid + ".log")
     }
+    # Guard: ensure error file paths ($errFile/$errorFile)
+    if (-not $errFile -or [string]::IsNullOrWhiteSpace($errFile)) {
+      $errFile = Join-Path $LiveDir ("error_" + $rid + ".txt")
+    }
+    if (-not $errorFile -or [string]::IsNullOrWhiteSpace($errorFile)) {
+      $errorFile = $errFile
+    }
 Step "Transcript → $tx"
 Start-Transcript -Path $tx | Out-Null
 $status = "OK"
 try {
   Step "RUN_BEGIN (RID=$rid)"
   Step "EXEC: $Cmd"
-  $null = Invoke-Expression $Cmd
+    Step "Transcript → $tx"
 } catch {
   $status = "ERROR"
   $msg = ($_ | Out-String).Trim()
