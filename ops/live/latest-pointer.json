@@ -1,12 +1,12 @@
 {
-  "rid": "20250825T193958.1739683Z-95e26e2320a04b4588927b596aa8b60d",
+  "rid": "20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706",
   "status": "ERROR",
-  "head": "51707b89b376d7ece3fef13b3e1b170c2f84f955",
+  "head": "ab87036d75a3d7154ba1919b023e99f44991c851",
   "file": "",
   "line": "",
   "files": {
     "error_md": "C:\\Users\\ander\\My project\\ops\\live\\latest-error.md",
-    "transcript": "C:\\Users\\ander\\My project\\ops\\live\\transcript_20250825T193958.1739683Z-95e26e2320a04b4588927b596aa8b60d.log",
-    "error_txt": "C:\\Users\\ander\\My project\\ops\\live\\error_20250825T193958.1739683Z-95e26e2320a04b4588927b596aa8b60d.txt"
+    "transcript": "C:\\Users\\ander\\My project\\ops\\live\\transcript_20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706.log",
+    "error_txt": "C:\\Users\\ander\\My project\\ops\\live\\error_20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706.txt"
   }
 }

@@ -1,23 +1,23 @@
 # Latest Error Snapshot
 
 **RID:** 
-20250825T193958.1739683Z-95e26e2320a04b4588927b596aa8b60d
+20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706
   
 **Status:** ERROR  
 **Error:** 
-NativeCommandExitException: Program "pwsh.exe" ended with non-zero exit code: 1.
+(none)
   
 
 ```text
 **********************
 PowerShell transcript start
-Start time: 20250825193958
+Start time: 20250825195426
 Username: DESKTOP-UQ7MKQ0\ander
 RunAs User: DESKTOP-UQ7MKQ0\ander
 Configuration Name: 
 Machine: DESKTOP-UQ7MKQ0 (Microsoft Windows NT 10.0.19045.0)
 Host Application: C:\Program Files\PowerShell\7\pwsh.dll -NoProfile -File C:\Users\ander\My project\tools\ops\safepush-run.ps1 -RepoRoot C:\Users\ander\My project -Cmd pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\tests\bad-parse.ps1"
-Process ID: 24844
+Process ID: 29896
 PSVersion: 7.5.2
 PSEdition: Core
 GitCommitId: 7.5.2
@@ -28,13 +28,8 @@ PSRemotingProtocolVersion: 2.3
 SerializationVersion: 1.1.0.1
 WSManStackVersion: 3.0
 **********************
-[step] RUN_BEGIN (RID=20250825T193958.1739683Z-95e26e2320a04b4588927b596aa8b60d)
+[step] RUN_BEGIN (RID=20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706)
 [step] EXEC: pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\tests\bad-parse.ps1"
-PS>TerminatingError(): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Program "pwsh.exe" ended with non-zero exit code: 1."
->> TerminatingError(): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Program "pwsh.exe" ended with non-zero exit code: 1."
-PS>TerminatingError(safepush-run.ps1): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: NativeCommandExitException: Program "pwsh.exe" ended with non-zero exit code: 1."
-**********************
-PowerShell transcript end
-End time: 20250825193958
-**********************
+[step] Transcript → C:\Users\ander\My project\ops\live\transcript_20250825T195426.0561177Z-65c0774ce8ed4316b9917f2f432c8706.log
+[step] Safety publish: ensure latest-* exist for this RID
 ```
