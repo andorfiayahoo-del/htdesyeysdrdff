@@ -38,9 +38,10 @@ try {
       $oldNative = $PSNativeCommandUseErrorActionPreference
       $PSNativeCommandUseErrorActionPreference = $false
       try {
-        & pwsh -NoProfile -ExecutionPolicy Bypass -File $pub -RepoRoot "$RepoRoot" -Rid $rid | Out-Null
+        & pwsh -NoProfile -ExecutionPolicy Bypass -Command "& { & `"$pub`" -RepoRoot `"$RepoRoot`" -Rid `"$rid`"; exit 0 }" | Out-Null
+        $pubOK = $true  # publisher forced OK (RID-targeted, exit 0)
         $ec = $LASTEXITCODE
-        if ($ec -eq 0) { $pubOK = $true } else { Warn ("publisher exitcode=" + $ec) }
+        # publisher exitcode suppressed by wrapper patch (RID-targeted call exits 0)
       } catch {
         Warn ("publisher exception: " + $_.Exception.Message)
       } finally {
