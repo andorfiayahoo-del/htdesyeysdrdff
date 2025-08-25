@@ -22,7 +22,8 @@ $ridMatch = [regex]::Match($lastBegin.Line, 'RID=([^\s]+)')
 if(-not $ridMatch.Success){ Die "Could not parse RID from: $($lastBegin.Line)" }
 $rid = $ridMatch.Groups[1].Value
 
-$block = $all | Where-Object { $_ -match ("RID=" + [regex]::Escape($rid)) }
+# Gather only lines for this RID and ensure pure string[] type
+$block = @($all | Where-Object { $_ -match ("RID=" + [regex]::Escape($rid)) } | ForEach-Object { [string]$_ })
 if(-not $block -or $block.Count -eq 0){ Die "No lines found for RID=$rid" }
 
 $commitMatch = $block | Select-String -Pattern 'VERIFY_STRICT_OK commit=([0-9a-f]{7,40})' | Select-Object -First 1
@@ -50,7 +51,7 @@ if($commit -and $commit.Length -gt 0){ $md.Add("**Commit:** $commit  ") }
 if($errText -and $errText.Length -gt 0){ $md.Add("**Last error hint:** $errText  ") } else { $md.Add("**Last error hint:** none detected  ") }
 $md.Add('')
 $md.Add('```text')
-$md.AddRange($block)
+foreach($line in $block){ $md.Add($line) }   # safer than AddRange with generics
 $md.Add('```')
 Write-LF $OutMD $md.ToArray()
 
