@@ -122,6 +122,57 @@ try {
   if($status -ne "OK"){ exit 2 }
 }
 
+    Step "Safety publish: ensure latest-* exist for this RID"
+    try {
+      $liveDirFinal  = if ($LiveDir) { $LiveDir } else { Join-Path $RepoRoot 'ops\live' }
+      if (!(Test-Path $liveDirFinal)) { New-Item -ItemType Directory -Path $liveDirFinal -Force -ErrorAction SilentlyContinue | Out-Null }
+      $pointerFinal  = Join-Path $liveDirFinal 'latest-pointer.json'
+      $latestMdFinal = Join-Path $liveDirFinal 'latest-error.md'
+      $txPath        = if ($tx) { $tx } else { Join-Path $liveDirFinal ("transcript_" + $rid + ".log") }
+      $errPathLocal  = if ($errFile) { $errFile } else { Join-Path $liveDirFinal ("error_" + $rid + ".txt") }
+
+      $need = $true
+      if (Test-Path $pointerFinal) {
+        try {
+          $p = Get-Content $pointerFinal -Raw | ConvertFrom-Json
+          if ($p -and $p.rid -eq $rid) { $need = $false }
+        } catch { $need = $true }
+      }
+
+      if ($need) {
+        $tail = @(); try { if (Test-Path $txPath) { $tail = Get-Content $txPath -Tail 100 } } catch {}
+        $errTxt = @(); try { if (Test-Path $errPathLocal) { $errTxt = Get-Content $errPathLocal } } catch {}
+        $errJoined = if ($errTxt -and $errTxt.Count -gt 0) { ($errTxt -join ' ') } else { '(none)' }
+
+        $md = @(
+          '# Latest Error Snapshot','',
+          '**RID:** ' + $rid + '  ',
+          '**Status:** ERROR  ',
+          '**Error:** ' + $errJoined + '  ','',
+          '```text'
+        ) + $tail + @('```')
+
+        $enc = New-Object System.Text.UTF8Encoding($false)
+        [IO.File]::WriteAllText($latestMdFinal, ($md -join "`n"), $enc)
+
+        $headNow = ''; try { $headNow = (git -C "$RepoRoot" rev-parse HEAD).Trim() } catch {}
+        $ptr = [pscustomobject]@{
+          rid   = $rid; status = "ERROR"; head = $headNow; file = ""; line = "";
+          files = [pscustomobject]@{ error_md = $latestMdFinal; transcript = $txPath; error_txt = $errPathLocal }
+        }
+        $json = ($ptr | ConvertTo-Json -Depth 6)
+        [IO.File]::WriteAllText($pointerFinal, $json + "`n", $enc)
+
+        git -C "$RepoRoot" add -- "$latestMdFinal" "$pointerFinal" | Out-Null
+        git -C "$RepoRoot" commit -m "ops: safety publish latest-* for rid=$rid" | Out-Null
+        if((git -C "$RepoRoot" config --get alias.vpush) -ne $null){ git -C "$RepoRoot" vpush | Out-Null } else { git -C "$RepoRoot" push -u origin main | Out-Null }
+        Step "Safety publish completed for rid=$rid"
+      } else {
+        Step "Safety publish: pointer already up to date for rid=$rid"
+      }
+    } catch {
+      Warn ("Safety publish failed: " + $_.Exception.Message)
+    }
 Step "Finalize: update latest-pointer head to current HEAD"
 try {
   # Resolve live dir & pointer paths safely (work even if earlier vars are null)
