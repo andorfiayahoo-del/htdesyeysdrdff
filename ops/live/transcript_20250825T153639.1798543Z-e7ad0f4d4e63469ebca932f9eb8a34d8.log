@@ -18,3 +18,8 @@ SerializationVersion: 1.1.0.1
 WSManStackVersion: 3.0
 **********************
 [step] RUN_BEGIN (RID=20250825T153639.1798543Z-e7ad0f4d4e63469ebca932f9eb8a34d8)
+[step] EXEC: pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\patch-minforce.ps1" -ProjectRoot "C:\Users\ander\My project" -TimeoutSec 900
+**********************
+PowerShell transcript end
+End time: 20250825153707
+**********************
