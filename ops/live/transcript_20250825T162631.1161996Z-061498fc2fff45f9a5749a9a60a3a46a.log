@@ -1,0 +1,25 @@
+**********************
+PowerShell transcript start
+Start time: 20250825162631
+Username: DESKTOP-UQ7MKQ0\ander
+RunAs User: DESKTOP-UQ7MKQ0\ander
+Configuration Name: 
+Machine: DESKTOP-UQ7MKQ0 (Microsoft Windows NT 10.0.19045.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -NoProfile -File C:\Users\ander\My project\tools\ops\safepush-run.ps1 -RepoRoot C:\Users\ander\My project -Cmd pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\tests\pipeline-divzero.ps1"
+Process ID: 19960
+PSVersion: 7.5.2
+PSEdition: Core
+GitCommitId: 7.5.2
+OS: Microsoft Windows 10.0.19045
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+[step] RUN_BEGIN (RID=20250825T162631.1161996Z-061498fc2fff45f9a5749a9a60a3a46a)
+[step] EXEC: pwsh -NoProfile -File "C:\Users\ander\My project\tools\ops\tests\pipeline-divzero.ps1"
+**********************
+PowerShell transcript end
+End time: 20250825162631
+**********************
