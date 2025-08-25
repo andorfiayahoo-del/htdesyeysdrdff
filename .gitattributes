@@ -14,3 +14,6 @@
 ops/live/push-flush.log merge=union -diff
 docs/*.md text eol=lf
 *.cs text eol=crlf
+*.cs   text eol=crlf
+*.meta text eol=crlf
+.gitignore text eol=lf

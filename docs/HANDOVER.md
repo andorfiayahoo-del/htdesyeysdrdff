@@ -1,129 +1,63 @@
 # Handover & Assistant Guide (Canonical)
 
-This document is the **source of truth** for how assistants and humans work in this repo.
+This repository is configured for JDI (Just Do It) on low-risk, reversible changes. Use the ops scripts below as the source of truth.
 
-## 1) Default Operating Mode: JDI (Just Do It)
+## 1) Default Operating Mode: JDI
 
-Default: For any low-risk, non-destructive, easily reversible change, assistants should implement it immediately without asking.
-Examples:
-- Fix typos; clarify comments; improve docs.
-- Normalize line endings per repo policy; fix encoding warnings.
-- Add tiny helper scripts or idempotent ops improvements.
-- Remove or silence harmless warnings; improve logging and traceability.
-- Update `.gitattributes` or `.editorconfig` to match policy.
+- Do it immediately when the change is low-risk, non-destructive, and easy to revert.
+- Examples: fix typos, tighten docs, normalize EOL/encoding per policy, add tiny idempotent ops helpers, reduce harmless warnings.
+- Notify after doing it (brief summary + exact commands, optional one-liner to revert).
 
-Notify: After a JDI change, post a short summary plus the exact commands, and when sensible a one-liner to revert.
+Ask first when the change is destructive, touches security/secrets, adds external cost/quotas, alters verification semantics, or is a big behavior refactor.
 
-### Ask-First Triggers
-- Destructive changes (deletions or renames with behavior or data impact).
-- Anything touching security, secrets, or credentials.
-- Changes that add cost or external service impact.
-- Altering verification semantics or branch protections.
-- Big structural refactors or behavior-altering logic.
-- Anything likely to surprise a maintainer.
+## 2) Owner preferences (Ander)
 
-### When in doubt
-If the risk is not near-zero or revert is not trivial, ask first.
-
----
-
-## 2) Owner Preferences (Ander)
-- Keep responses concise with paste-ready code blocks.
-- Default to JDI (do not ask for obvious, no-downside fixes).
-- Use PowerShell 7+ (pwsh).
+- Keep replies concise with paste-ready code blocks.
+- PowerShell 7+ (pwsh).
+- Copy/paste safety: do not use here-strings in chat code. Prefer arrays joined with LF/CRLF or small writers.
 - EOL policy:
-  - PowerShell scripts (*.ps1, *.psm1, *.psd1, *.bat, *.cmd) -> CRLF
-  - Repo meta and dotfiles (.editorconfig, .gitattributes, .gitignore) and shell scripts (*.sh, *.bash) -> LF
+  - PowerShell/C#/batch and Unity .meta files -> CRLF
+  - Docs (.md), dotfiles -> LF
   - UTF-8 (no BOM), final newline, trim trailing whitespace.
-- Ops pipeline:
-  - tools/ops/git-sync.ps1 integrated with `git vpush` -> commit, push, verify.
-  - Verification logs: ops/live/push-flush.log (RID-stamped).
-- Content helper: tools/ops/ContentHelpers.psm1 -> Set-ContentLF for LF-only writes when needed.
 
-Commit messages:
-- sync: auto (REASON) 2025-01-02T03:04:05.678Z for ops auto-commits
-- docs: ..., ops: ..., repo: ... for manual intent
-- Factual and terse.
+## 3) Unity: compile-wait integration (current, working)
 
----
+- Editor sentinel: Assets/Editor/Ops/CompileSentinel.cs writes ops/live/unity-compile.json reflecting isCompiling/isUpdating.
+- Waiter: tools/ops/unity-wait-compile.ps1 blocks until both flags are false.
+- Focus step: tools/ops/step-wait-unity.ps1 detects when Unity gains focus and then blocks until compile completes (no keypress).
+- Validator: tools/ops/step-validate-match.ps1 prints matched/mismatched/missing and fails hard unless -Soft is used.
+- Minimal patch driver: tools/ops/patch-minforce.ps1 writes a tiny .cs to force a recompile, then runs the focus+wait step and validator, then your normal vpush flow uploads logs.
 
-## 3) Copy/Paste Safety (Hard Rule)
-- Never use PowerShell here-strings in chat code.
-- Prefer arrays + `Set-ContentLF -Lines` or for large blobs Base64 decode.
-- Keep scripts idempotent and re-runnable.
+Quickstart:
 
----
-
-## 4) Conventions & Guardrails
-- .gitattributes and .editorconfig pin EOL and formatting; follow them.
-- Encoding: UTF-8 (no BOM).
-- Logs: Structured, RID-tagged; avoid noisy stdout unless useful.
-- Verification: tools/ops/verify-remote.ps1 runs after push and must exit 0; output is folded into push-flush.log.
-
----
-
-## 5) Quick Recipes
-
-### Write a file with LF newlines
 ```powershell
-Import-Module (Join-Path $PSScriptRoot "tools/ops/ContentHelpers.psm1") -Force
-Set-ContentLF -Path (Join-Path $RepoRoot ".gitattributes") -Lines @(
-  '* text=auto',
-  '*.ps1  text eol=crlf','*.psm1 text eol=crlf','*.psd1 text eol=crlf',
-  '*.bat  text eol=crlf','*.cmd  text eol=crlf',
-  '*.sh   text eol=lf','*.bash text eol=lf',
-  '.editorconfig text eol=lf','.gitattributes text eol=lf','.gitignore text eol=lf'
-)
-```
-
-### Commit, push, and verify
-```powershell
-git -C "$RepoRoot" vpush
+$RepoRoot = "C:\Users\ander\My project"
+pwsh -NoProfile -File "$RepoRoot\tools\ops\patch-minforce.ps1" -ProjectRoot "$RepoRoot" -TimeoutSec 900
 Get-Content "$RepoRoot\ops\live\push-flush.log" -Tail 80
 ```
 
-### Sentinel sanity
-```powershell
-$sentinel = Join-Path $RepoRoot "ops\verify-sentinel.txt"
-"hello $(Get-Date -Format o)" | Set-Content -LiteralPath $sentinel -Encoding utf8
-git -C "$RepoRoot" vpush
-Remove-Item -LiteralPath $sentinel -ErrorAction SilentlyContinue
-git -C "$RepoRoot" vpush
-```
+What you should see in the log:
+- A Unity focus line, then a busy -> idle wait completion.
+- A validation line like: [validate-match] matched=1 mismatched=0 missing=0
+- The verify job committing ops/live artifacts (push-flush.log, match.json, unity-compile.json).
 
----
+## 4) Repo map (ops essentials)
 
-## 6) Onboarding (new assistant or human)
-1. Read this Handover. Default to JDI.
-2. Do a tiny no-risk change, commit via vpush, confirm verify passes.
-3. Use the recipes above; prefer paste-ready code in updates.
+- tools/ops/unity-wait-compile.ps1 : sentinel poller, blocks until compile done.
+- tools/ops/step-wait-unity.ps1     : cyan UX, auto-detects Unity focus then waits.
+- tools/ops/step-validate-match.ps1 : prints matched/mismatched/missing and fails if needed.
+- tools/ops/patch-minforce.ps1      : minimal test patch to force a compile, then wait + validate.
+- docs/HANDOVER.md                   : this file (canonical).
+- ops/live/*                         : verify and runtime logs (committed by vpush flow).
 
----
+## 5) Conventions and verification
 
-## 7) Rollback and Recovery
-- Revert last commit (safe): `git revert <sha>`
-- Hard reset local (dangerous): `git reset --hard <sha>`
+- Follow .gitattributes and .editorconfig. Do not fight the EOL policy.
+- Idempotent scripts; safe to re-run.
+- Post-push verification runs tools/ops/verify-remote.ps1 and appends to ops/live/push-flush.log, which is committed and pushed automatically.
+
+## 6) Rollback
+
+- Safe: git revert <sha>
+- Local reset (dangerous): git reset --hard <sha>
 - If verification fails, check ops/live/push-flush.log for VERIFY_* lines.
-
----
-
-## Unity: Wait for compile (sentinel)
-
-- A tiny Editor script (`Assets/Editor/Ops/CompileSentinel.cs`) writes `ops/live/unity-compile.json` on compile start/finish.
-- Use `tools/ops/unity-wait-compile.ps1` to block until the Editor is done compiling.
-
-### Usage
-
-```powershell
-# Wait until the open Unity Editor has finished compiling
-pwsh tools/ops/unity-wait-compile.ps1 -ProjectRoot "C:\Users\ander\My project" -TimeoutSec 300
-
-# (Optional) If Unity is not open, ping via -executeMethod to write the sentinel once:
-pwsh tools/ops/unity-wait-compile.ps1 -ProjectRoot "C:\Users\ander\My project" -TimeoutSec 120 -UnityExe "C:\Program Files\Unity\Hub\Editor\<ver>\Editor\Unity.exe" -EmitPing
-```
-
-### Notes
-
-- Sentinel path: `ops/live/unity-compile.json` (kept outside `Assets`).
-- Success = both `isCompiling=false` and `isUpdating=false`.
-- Script is idempotent; safe to call between patch steps to serialize work.
