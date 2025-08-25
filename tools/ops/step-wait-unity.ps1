@@ -1,42 +1,24 @@
-param(
-  [string]$ProjectRoot = (Get-Location).Path,
-  [int]$TimeoutSec = 900,
-  [string]$StepLabel = "[Step] Focus Unity, then wait for compile (no keypress)"
-)
+param([string]$ProjectRoot = (Get-Location).Path, [int]$TimeoutSec = 900, [switch]$RequireBusy)
 $ErrorActionPreference = "Stop"
 $waiter = Join-Path $PSScriptRoot "unity-wait-compile.ps1"
 if (-not (Test-Path -LiteralPath $waiter)) { throw "Missing waiter: $waiter" }
-
-Add-Type @'
-using System;
-using System.Runtime.InteropServices;
-public static class Fgw {
-  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-}
-'@
-
-Write-Host $StepLabel -ForegroundColor Cyan
+Add-Type -Namespace Fgw -Name Win32 -MemberDefinition @("
+  [DllImport(""user32.dll"")] public static extern IntPtr GetForegroundWindow();
+  [DllImport(""user32.dll"")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
+")
+Write-Host "[Step] Focus Unity, then wait for compile (no keypress)" -ForegroundColor Cyan
 Write-Host " — bring Unity to the front; I will detect focus automatically." -ForegroundColor Cyan
-$deadline = (Get-Date).AddSeconds($TimeoutSec)
-function Test-UnityFocused {
-  $h = [Fgw]::GetForegroundWindow()
-  if ($h -eq [IntPtr]::Zero) { return $false }
-  [uint32]$fgPid = 0; [void][Fgw]::GetWindowThreadProcessId($h, [ref]$fgPid)
-  if ($pid -eq 0) { return $false }
-  try {
-    $p = Get-Process -Id $fgPid -ErrorAction SilentlyContinue
-    if (-not $p) { return $false }
-    if ($p.ProcessName -match '^Unity$') { return $true }
-    # Fallback: title contains "Unity"
-    if ($p.MainWindowTitle -match 'Unity') { return $true }
-    return $false
-  } catch { return $false }
-}
-
-while (-not (Test-UnityFocused)) {
-  if ((Get-Date) -gt $deadline) { throw "Timeout waiting for Unity to get focus." }
-  Start-Sleep -Milliseconds 250
+$deadline = (Get-Date).AddSeconds([Math]::Min($TimeoutSec, 120))
+while ($true) {
+  $h = [Fgw.Win32]::GetForegroundWindow()
+  if ($h -ne [IntPtr]::Zero) {
+    [uint32]$ppid = 0; [void][Fgw.Win32]::GetWindowThreadProcessId($h, [ref]$ppid)
+    try {
+      if ($ppid -ne 0) { $p = Get-Process -Id $ppid -ErrorAction Stop; if ($p.ProcessName -like "Unity*") { break } }
+    } catch {}
+  }
+  if ((Get-Date) -gt $deadline) { Write-Host "[unity-focus] Timed out waiting for Unity focus (continuing anyway)" -ForegroundColor Yellow; break }
+  Start-Sleep -Milliseconds 120
 }
 Write-Host "[unity-focus] Unity focused — waiting for compile completion..." -ForegroundColor Cyan
-& $waiter -ProjectRoot $ProjectRoot -TimeoutSec $TimeoutSec
+& $waiter -ProjectRoot $ProjectRoot -TimeoutSec $TimeoutSec -RequireBusy:$RequireBusy.IsPresent

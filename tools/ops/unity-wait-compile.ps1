@@ -1,36 +1,33 @@
 param(
   [Parameter(Mandatory)][string]$ProjectRoot,
   [int]$TimeoutSec = 300,
-  [string]$UnityExe,
-  [switch]$EmitPing
+  [switch]$RequireBusy
 )
 $ErrorActionPreference = "Stop"
 $Sentinel = Join-Path $ProjectRoot "ops\live\unity-compile.json"
 $deadline = (Get-Date).AddSeconds($TimeoutSec)
-function Get-CompileState {
+function Read-State {
   if (-not (Test-Path -LiteralPath $Sentinel)) { return @{ found=$false } }
-  try { $j = Get-Content -LiteralPath $Sentinel -Raw | ConvertFrom-Json } catch { $j = $null }
-  if ($null -eq $j) { return @{ found=$true; isCompiling=$true; isUpdating=$true } }
-  return @{ found=$true; isCompiling=[bool]$j.isCompiling; isUpdating=[bool]$j.isUpdating; stamp=$j.timestamp }
+  try {
+    $j = Get-Content -LiteralPath $Sentinel -Raw | ConvertFrom-Json
+    return @{ found=$true; isCompiling=[bool]$j.isCompiling; isUpdating=[bool]$j.isUpdating; stamp=$j.timestamp }
+  } catch { return @{ found=$true; isCompiling=$true; isUpdating=$true } }
 }
-if ($EmitPing -and $UnityExe) {
-  Write-Host "[unity-wait-compile] Emitting ping via Unity.exe" -ForegroundColor Cyan
-  & $UnityExe -projectPath $ProjectRoot -batchmode -nographics -quit -executeMethod Ops.CompileSentinel.EmitOnce | Out-Null
+while (-not (Test-Path -LiteralPath $Sentinel)) {
+  if ((Get-Date) -gt $deadline) { throw "Timeout: sentinel not found at $Sentinel" }
+  Start-Sleep -Milliseconds 200
 }
+$seenBusy = $false
+$stableIdle = 0
 while ($true) {
-  if ((Get-Date) -gt $deadline) { throw "Timeout waiting for sentinel at $Sentinel" }
-  $s = Get-CompileState
-  if ($s.found) { break }
-  Write-Host "[unity-wait-compile] Sentinel not found yet, retrying..." -ForegroundColor DarkGray
-  Start-Sleep -Seconds 1
-}
-while ($true) {
-  if ((Get-Date) -gt $deadline) { throw "Timeout waiting for Unity to finish compiling/updating" }
-  $s = Get-CompileState
-  if ($s.found -and -not $s.isCompiling -and -not $s.isUpdating) {
-    Write-Host "[unity-wait-compile] Done: isCompiling=$($s.isCompiling) isUpdating=$($s.isUpdating)" -ForegroundColor Green
-    break
+  if ((Get-Date) -gt $deadline) { throw "Timeout: Unity did not reach idle state" }
+  $s = Read-State
+  if ($s.found) {
+    if ($s.isCompiling -or $s.isUpdating) { $seenBusy = $true; $stableIdle = 0 }
+    else { if (-not $RequireBusy -or $seenBusy) { $stableIdle++ } }
   }
-  Start-Sleep -Milliseconds 500
+  if ($stableIdle -ge 3) { break }
+  Start-Sleep -Milliseconds 200
 }
+Write-Host "[unity-wait-compile] Idle after busy=$seenBusy" -ForegroundColor Green
 exit 0
