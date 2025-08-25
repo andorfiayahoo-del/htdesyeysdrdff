@@ -9,31 +9,6 @@ function Step($m){ Write-Host "[step] $m" -ForegroundColor Cyan }
 function Warn($m){ Write-Warning $m }
 function Write-LF([string]$Path,[string[]]$Lines){ $enc = New-Object System.Text.UTF8Encoding($false); [IO.File]::WriteAllText($Path, ($Lines -join "`n"), $enc) }
 if(!(Test-Path $RepoRoot)){ throw "Repo root not found: $RepoRoot" }
-    Step "Post-commit: update latest-pointer head to current HEAD (artifacts commit)"
-    try {
-      # $pointer should be in scope from the publisher block; fall back to default path if not
-      if (-not $pointer) { $pointer = Join-Path $LiveDir 'latest-pointer.json' }
-      if (Test-Path $pointer) {
-        $headNow = (git -C "$RepoRoot" rev-parse HEAD).Trim()
-        $obj = Get-Content $pointer -Raw | ConvertFrom-Json
-        if ($obj) {
-          $obj.head = $headNow
-          $json = ($obj | ConvertTo-Json -Depth 6)
-          $enc = New-Object System.Text.UTF8Encoding($false)
-          [IO.File]::WriteAllText($pointer, $json + "`n", $enc)
-          git -C "$RepoRoot" add -- "$pointer" | Out-Null
-          git -C "$RepoRoot" commit -m "ops: update latest-pointer head to post-commit SHA" | Out-Null
-          if((git -C "$RepoRoot" config --get alias.vpush) -ne $null){ git -C "$RepoRoot" vpush | Out-Null } else { git -C "$RepoRoot" push -u origin main | Out-Null }
-        }
-      }
-    } catch {
-      Warn ("post-commit pointer head update failed: " + $_.Exception.Message)
-    }
-if(!(Test-Path (Join-Path $RepoRoot '.git'))){ throw "Not a git repo: $RepoRoot" }
-$LiveDir = Join-Path $RepoRoot 'ops\live' ; if(!(Test-Path $LiveDir)){ New-Item -ItemType Directory -Path $LiveDir | Out-Null }
-$rid = (Get-Date).ToString("yyyyMMddTHHmmss.fffffffZ") + "-" + ([guid]::NewGuid().ToString("N"))
-$tx = Join-Path $LiveDir ("transcript_" + $rid + ".log")
-$errFile = Join-Path $LiveDir ("error_" + $rid + ".txt")
 Step "Transcript → $tx"
 Start-Transcript -Path $tx | Out-Null
 $status = "OK"
@@ -125,4 +100,32 @@ try {
   }
   Step "RUN_END status=$status RID=$rid"
   if($status -ne "OK"){ exit 2 }
+}
+
+Step "Finalize: update latest-pointer head to current HEAD"
+try {
+  # Resolve live dir & pointer paths safely (work even if earlier vars are null)
+  $liveDirFinal = if ($LiveDir) { $LiveDir } else { Join-Path $RepoRoot 'ops\live' }
+  $pointerFinal = if ($pointer) { $pointer } else { Join-Path $liveDirFinal 'latest-pointer.json' }
+
+  if (Test-Path $pointerFinal) {
+    $headNow = (git -C "$RepoRoot" rev-parse HEAD).Trim()
+    $obj = Get-Content $pointerFinal -Raw | ConvertFrom-Json
+    if ($obj) {
+      $obj.head = $headNow
+      $json = ($obj | ConvertTo-Json -Depth 6)
+      $enc = New-Object System.Text.UTF8Encoding($false)
+      [IO.File]::WriteAllText($pointerFinal, $json + "`n", $enc)
+      git -C "$RepoRoot" add -- "$pointerFinal" | Out-Null
+      git -C "$RepoRoot" commit -m "ops: pointer head synced to post-run HEAD" | Out-Null
+      if((git -C "$RepoRoot" config --get alias.vpush) -ne $null){ git -C "$RepoRoot" vpush | Out-Null } else { git -C "$RepoRoot" push -u origin main | Out-Null }
+      Step "Pointer head updated to post-run HEAD"
+    } else {
+      Step "Finalize: pointer JSON unreadable — skipping update"
+    }
+  } else {
+    Step "Finalize: no pointer file found — skipping"
+  }
+} catch {
+  Warn ("Finalize head update failed: " + $_.Exception.Message)
 }
