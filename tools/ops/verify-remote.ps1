@@ -161,3 +161,11 @@ catch {
 }
 finally { Pop-Location }
 
+
+# --- autopublish-latest-run (do not duplicate) ---
+try {
+  $pub = Join-Path $PSScriptRoot 'publish-latest-log.ps1'
+  if (Test-Path $pub) {
+    & pwsh -NoProfile -ExecutionPolicy Bypass -File $pub -RepoRoot "$RepoRoot" | Out-Null
+  }
+} catch { Write-Warning ("publish-latest-log failed: " + $_.Exception.Message) }

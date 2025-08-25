@@ -17,3 +17,6 @@ docs/*.md text eol=lf
 *.cs   text eol=crlf
 *.meta text eol=crlf
 .gitignore text eol=lf
+
+ops/live/*.md  text eol=lf
+ops/live/*.log text eol=lf
