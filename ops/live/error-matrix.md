@@ -1,0 +1,5 @@
+# Error Matrix
+
+2025-08-25 16:26:45Z
+
+| Test | RID | Status | File:Line | Commit | |---|---|---|---|---| | bad-parse.ps1 | 20250825T161859.9079170Z-cd1f623ea03d4f20999a2b6efddefca0 | ERROR | : | 80ca7cf827306dc1b444d661ef6cacb739014939 | | throw-runtime.ps1 | 20250825T161859.9079170Z-cd1f623ea03d4f20999a2b6efddefca0 | ERROR | : | 80ca7cf827306dc1b444d661ef6cacb739014939 | | native-fail.ps1 | 20250825T161859.9079170Z-cd1f623ea03d4f20999a2b6efddefca0 | ERROR | : | 80ca7cf827306dc1b444d661ef6cacb739014939 | | exit1.ps1 | 20250825T161859.9079170Z-cd1f623ea03d4f20999a2b6efddefca0 | ERROR | : | 80ca7cf827306dc1b444d661ef6cacb739014939 | | missing-command.ps1 | 20250825T161859.9079170Z-cd1f623ea03d4f20999a2b6efddefca0 | ERROR | : | 80ca7cf827306dc1b444d661ef6cacb739014939 | | pipeline-divzero.ps1 | 20250825T161859.9079170Z-cd1f623ea03d4f20999a2b6efddefca0 | ERROR | : | 80ca7cf827306dc1b444d661ef6cacb739014939 | | nonterm-error.ps1 | 20250825T161859.9079170Z-cd1f623ea03d4f20999a2b6efddefca0 | ERROR | : | 80ca7cf827306dc1b444d661ef6cacb739014939 |
