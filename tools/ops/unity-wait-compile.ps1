@@ -9,10 +9,9 @@ $Sentinel = Join-Path $ProjectRoot "ops\live\unity-compile.json"
 $deadline = (Get-Date).AddSeconds($TimeoutSec)
 function Get-CompileState {
   if (-not (Test-Path -LiteralPath $Sentinel)) { return @{ found=$false } }
-  try {
-    $j = Get-Content -LiteralPath $Sentinel -Raw | ConvertFrom-Json
-    return @{ found=$true; isCompiling=[bool]$j.isCompiling; isUpdating=[bool]$j.isUpdating; stamp=$j.timestamp }
-  } catch { return @{ found=$true; isCompiling=$true; isUpdating=$true } }
+  try { $j = Get-Content -LiteralPath $Sentinel -Raw | ConvertFrom-Json } catch { $j = $null }
+  if ($null -eq $j) { return @{ found=$true; isCompiling=$true; isUpdating=$true } }
+  return @{ found=$true; isCompiling=[bool]$j.isCompiling; isUpdating=[bool]$j.isUpdating; stamp=$j.timestamp }
 }
 if ($EmitPing -and $UnityExe) {
   Write-Host "[unity-wait-compile] Emitting ping via Unity.exe" -ForegroundColor Cyan

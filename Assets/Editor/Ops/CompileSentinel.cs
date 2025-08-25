@@ -19,7 +19,7 @@ namespace Ops {
         SentinelPath = Path.Combine(ProjectRoot, "ops", "live", "unity-compile.json");
         EditorApplication.update += OnUpdate;
         WriteStatus(true);
-      } catch { /* swallow */ }
+      } catch { }
     }
 
     [MenuItem("Ops/Emit Compile Sentinel Once")]
@@ -31,10 +31,9 @@ namespace Ops {
         bool u = EditorApplication.isUpdating;
         if (c != lastC || u != lastU) { WriteStatus(true); return; }
         if (c || u) {
-          if ((DateTime.UtcNow - lastWriteUtc).TotalSeconds > 2)
-            WriteStatus(false);
+          if ((DateTime.UtcNow - lastWriteUtc).TotalSeconds > 2) WriteStatus(false);
         }
-      } catch { /* swallow */ }
+      } catch { }
     }
 
     static void WriteStatus(bool force) {
@@ -48,7 +47,7 @@ namespace Ops {
                    "\"timestamp\":\"" + DateTime.UtcNow.ToString("o") + "\"}";
         File.WriteAllText(SentinelPath, json, new UTF8Encoding(false));
         lastC = c; lastU = u; lastWriteUtc = DateTime.UtcNow;
-      } catch { /* swallow */ }
+      } catch { }
     }
   }
 }
